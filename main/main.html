@@ -114,15 +114,15 @@ function loadPageGame(page, game) {
 
 
 
-function load_game(url, width = 800, height = 600) {
+function load_game(url, width = 1280, height = 720) {
     // Hide grid
     document.getElementById('gameGrid').style.display = 'none';
-    
+
     // Show game player
     const gamePlayer = document.getElementById('GamePlayer');
-    gamePlayer.style.display = 'block';
-    
-    // Set iframe source
+    gamePlayer.style.display = 'flex'; // flex to respect column layout
+
+    // Load iframe
     const iframe = document.getElementById('GameEmbed');
     iframe.src = url;
 
@@ -130,6 +130,7 @@ function load_game(url, width = 800, height = 600) {
     const wrapper = document.getElementById('game_wrapper');
     wrapper.style.aspectRatio = `${width} / ${height}`;
 }
+
 
 function exit_game() {
     // Stop the game

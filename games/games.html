@@ -39,21 +39,20 @@
     </div>
 
 
-    <div id="GamePlayer" class="centered_container" style="display:none;">
-        <div class="iframe_wrapper" id="game_wrapper">
-        <div class="minigames_top_buttons_container" style="flex-direction:row-reverse;" align="center">
-            <button id="fullscreenButton" class="top_minigames_toggles">Fullscreen</button>
-            <button onclick="exit_game()" class="top_minigames_toggles">Back</button>
-        </div>
+<div id="GamePlayer" class="centered_container" style="display:none;">
+    <div class="minigames_top_buttons_container">
+        <button id="fullscreenButton" class="top_minigames_toggles">Fullscreen</button>
+        <button onclick="exit_game()" class="top_minigames_toggles">Back</button>
+    </div>
+    <div class="iframe_wrapper" id="game_wrapper">
+        <iframe class="game_embed" id="GameEmbed" scrolling="no"></iframe>
+    </div>
+    <p style="font-size: 1.5vh;" align="center">
+        Note: if any of the games have a save and you want to backup, check the appdata.<br>
+        If the game is made using Godot, look there!
+    </p>
+</div>
 
-            <iframe class="game_embed" id="GameEmbed" scrolling="no"></iframe>
-        </div>
-
-        <p style="font-size: 1.5vh;" align="center">
-            Note: if any of the games have a save and you want to backup, check the appdata.
-            <br>If the game is made using Godot, look there!
-        </p>
-    </div>    
 </div>
 </div>
 </body>
