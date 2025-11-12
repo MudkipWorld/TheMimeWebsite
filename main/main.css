@@ -5,6 +5,12 @@
   font-weight: 900;
 }
 
+#subview {
+  width: 100%;
+  height: auto;
+  transform-origin: top left;
+  transform: scale(1);
+}
 
 
 body {
