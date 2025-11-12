@@ -9,13 +9,13 @@
       
         <div class="row_flex_container">
           
-          <img src="../assets/main_page_assets/logo.png" height=150 alt="Mime Logo" onclick="loadPage('')" align="left" class="logo_image"/>
+          <img src="../assets/main_page_assets/themime_logo.svg" height=150vw alt="Mime Logo" onclick="loadPage('')" align="left" class="logo_image"/>
             <div class="top_buttons_div">
               
             <div class="top_buttons_container">
-              <button class="top_buttons green"  onclick="loadPage('../games/games.html')">Mini Games</button>
-              <button class="top_buttons yellow" onclick="loadPage('../projects/projects.html')">Projects</button>
               <button class="top_buttons blue"   onclick="loadPage('../news/news.html')">News</button>
+              <button class="top_buttons yellow" onclick="loadPage('../projects/projects.html')">Projects</button>
+              <button class="top_buttons green"  onclick="loadPage('../games/games.html')">Mini Games</button>
             </div>
 
             </div>
@@ -28,7 +28,8 @@
               <h2 align="center">Feel free to look around!</h2>
               <div class="main_colored_background"></div>
               <div class="main_container">
-              <img src="../assets/main_page_assets/me.png" height=500 alt="me"/>
+              <img src="../assets/main_page_assets/me.png" alt="me" class="bio_image"/>
+
               <div class="news_background"><p class="bio_text">
                     Hello! I am TheMime. I am an artist, animator and a programmer. I am mainly known for developing PNGTube-Remix and in tiny communities, being the developer behind Unique Aquarium. This is my official page. Feel free to take a look! 
                     <br>You can check some news/ updates here and play some games too!
@@ -113,15 +114,21 @@ function loadPageGame(page, game) {
 
 
 
-
-function load_game(url) {
+function load_game(url, width = 800, height = 600) {
     // Hide grid
     document.getElementById('gameGrid').style.display = 'none';
+    
     // Show game player
-    document.getElementById('GamePlayer').style.display = 'block';
-    // Load iframe
+    const gamePlayer = document.getElementById('GamePlayer');
+    gamePlayer.style.display = 'block';
+    
+    // Set iframe source
     const iframe = document.getElementById('GameEmbed');
     iframe.src = url;
+
+    // Adjust wrapper aspect ratio dynamically
+    const wrapper = document.getElementById('game_wrapper');
+    wrapper.style.aspectRatio = `${width} / ${height}`;
 }
 
 function exit_game() {

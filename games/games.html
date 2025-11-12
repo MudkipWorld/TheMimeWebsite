@@ -21,15 +21,16 @@
 
 
     <div id="gameGrid" class="game-grid">
-        <button class="card" onclick="load_game('../games/games/cross_cat/cross_cat.html')">
+        <button class="card" onclick="load_game('../games/games/cross_cat/cross_cat.html', 1280, 720)">
             <img src="../games/games/cross_cat/cross_cat.png" alt="Cat">
             <p>Cat Breeder (Concept)</p>
         </button>
 
-        <button class="card" onclick="load_game('../games/games/unique_aquarium/unique_aquarium.html')">
+        <button class="card" onclick="load_game('../games/games/unique_aquarium/unique_aquarium.html',1280, 720)">
             <img src="../assets/logos/unique_aquarium_logo.png" alt="uniqueA">
             <p>Unique Aquarium (Alpha)</p>
         </button>
+
 
         <button class="card" disabled>
             <img src="../games/games/Placeholder.png" alt="?">
@@ -39,12 +40,12 @@
 
 
     <div id="GamePlayer" class="centered_container" style="display:none;">
+        <div class="iframe_wrapper" id="game_wrapper">
         <div class="minigames_top_buttons_container" style="flex-direction:row-reverse;" align="center">
             <button id="fullscreenButton" class="top_minigames_toggles">Fullscreen</button>
             <button onclick="exit_game()" class="top_minigames_toggles">Back</button>
         </div>
 
-        <div class="iframe_wrapper" id="game_wrapper">
             <iframe class="game_embed" id="GameEmbed" scrolling="no"></iframe>
         </div>
 
