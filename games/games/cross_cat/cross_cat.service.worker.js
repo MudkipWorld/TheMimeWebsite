@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1762876609|395217987';
+const CACHE_VERSION = '1762978777|39822137';
 /** @type {string} */
 const CACHE_PREFIX = 'Crosscat-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
