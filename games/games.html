@@ -1,60 +1,54 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
-
 <head>
-    <link rel="stylesheet" href="../news/news.css"/>
-    <link rel="stylesheet" href="../games/games.css"/>
-    <link rel="stylesheet" href="../main/main.css"/>
-    <meta charset="UTF-8">
-    <meta name="viewport">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>Games and Demos!</title>
 
+  <!-- Styles -->
+  <link rel="stylesheet" href="../news/news.css">
+  <link rel="stylesheet" href="../games/games.css">
+  <link rel="stylesheet" href="../main/main.css">
 </head>
 
-
 <body>
+  <h1 align="center">Games and Demos!</h1>
+  <h2 align="center">You can play here Demos, Concepts and Quick short games!</h2>
 
-    <h1 align="center" >Games and Demos!</h1>
-    <h2 align="center" >You can play here Demos, Concepts and Quick short games!</h2>
+  <div class="minigame_colored_background"></div>
 
-    <div class="minigame_colored_background"></div>
+  <!-- Game Selection Grid -->
+  <div id="gameGrid" class="game-grid">
+    <button class="card" onclick="load_game('../games/games/cross_cat/cross_cat.html', 1280, 720)">
+      <img src="../games/games/cross_cat/cross_cat.png" alt="Cat">
+      <p>Cat Breeder (Concept)</p>
+    </button>
 
+    <button class="card" onclick="load_game('../games/games/unique_aquarium/unique_aquarium.html', 1280, 720)">
+      <img src="../assets/logos/unique_aquarium_logo.png" alt="uniqueA">
+      <p>Unique Aquarium (Alpha)</p>
+    </button>
 
-    <div id="gameGrid" class="game-grid">
-        <button class="card" onclick="load_game('../games/games/cross_cat/cross_cat.html', 1280, 720)">
-            <img src="../games/games/cross_cat/cross_cat.png" alt="Cat">
-            <p>Cat Breeder (Concept)</p>
-        </button>
+    <button class="card" disabled>
+      <img src="../games/games/Placeholder.png" alt="?">
+      <p>Coming Soon! (Be Patient!)</p>
+    </button>
+  </div>
 
-        <button class="card" onclick="load_game('../games/games/unique_aquarium/unique_aquarium.html',1280, 720)">
-            <img src="../assets/logos/unique_aquarium_logo.png" alt="uniqueA">
-            <p>Unique Aquarium (Alpha)</p>
-        </button>
-
-
-        <button class="card" disabled>
-            <img src="../games/games/Placeholder.png" alt="?">
-            <p>Coming Soon! (Be Patient!)</p>
-        </button>
-    </div>
-
-
-<div id="GamePlayer" class="centered_container" style="display:none;">
+  <!-- Game Player Section -->
+  <div id="GamePlayer" class="centered_container" style="display:none;">
     <div class="minigames_top_buttons_container">
-        <button id="fullscreenButton" class="top_minigames_toggles">Fullscreen</button>
-        <button onclick="exit_game()" class="top_minigames_toggles">Back</button>
+      <button id="fullscreenButton" class="top_minigames_toggles">Fullscreen</button>
+      <button onclick="exit_game()" class="top_minigames_toggles">Back</button>
     </div>
+
     <div class="iframe_wrapper" id="game_wrapper">
-        <iframe class="game_embed" id="GameEmbed" scrolling="no"></iframe>
+      <iframe class="game_embed" id="GameEmbed" scrolling="no"></iframe>
     </div>
-    <p style="font-size: 1.0rem;" align="center">
-        Note: if any of the games have a save and you want to backup, check the appdata.<br>
-        If the game is made using Godot, look there!
+
+    <p style="font-size: 1.5vh;" align="center">
+      Note: if any of the games have a save and you want to backup, check the appdata.<br>
+      If the game is made using Godot, look there!
     </p>
-</div>
-
-</div>
-</div>
+  </div>
 </body>
-
 </html>
