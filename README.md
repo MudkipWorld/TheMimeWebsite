@@ -1,0 +1,2 @@
+# TheMimeWebsite
+My personal website.
