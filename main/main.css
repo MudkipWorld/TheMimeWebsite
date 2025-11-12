@@ -1,0 +1,215 @@
+@font-face {
+  font-family: 'MouldyCheese';
+  src: url('../assets/font1.ttf') format('truetype');
+  font-style:normal;
+  font-weight: 900;
+}
+
+
+
+body {
+    background-image: url("../assets/main_page_assets/main_page.png"), linear-gradient(rgb(27, 172, 240), rgb(27, 172, 240), #ffffff, green,green);
+    background-repeat:no-repeat;
+    background-size: cover,  cover;
+    background-attachment: fixed, fixed;
+    background-blend-mode: normal;
+    background-position: center, center;
+    height: 100%;
+}
+
+
+.flex-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+  max-height: 90%;
+  margin: auto auto;
+}
+
+.bodybg {
+  position: relative; /* enables clipping context for absolute children */
+  background-color: rgba(160, 255, 223, 0.473);
+  border-radius: 20px;
+  overflow: hidden;   /* clips content like background image to border */
+  box-sizing: border-box;
+  padding: 25px;
+  height: 80%;
+}
+
+.top_buttons {
+  background-image: url("../assets/main_page_assets/buttom_monochrome.svg");
+  background-repeat: no-repeat;
+  background-attachment:local; 
+  background-size: 100%;
+  background-color: rgba(255, 255, 255, 0);
+  border:0cap;
+  color: rgb(33, 5, 59);
+  text-align: center ;
+  text-decoration: none;
+  display: inline-block;
+  width: 15vh;
+  height: 5vh;
+  font-size: 2vh;
+  font: bold;
+  cursor: pointer;
+  filter: drop-shadow(5px 0px 2px rgba(20, 7, 192, 0.24));
+  font-family: 'MouldyCheese'
+ }
+
+
+.top_buttons.green {
+  filter: sepia(1) saturate(500%) brightness(76%) contrast(150%) hue-rotate(90deg);
+}
+
+.top_buttons.yellow {
+  filter: sepia(1) saturate(300%) hue-rotate(25deg);
+}
+
+.top_buttons.blue {
+  filter: sepia(1) saturate(500%) brightness(75%) contrast(150%) hue-rotate(165deg);
+}
+
+
+
+.top_buttons_container {
+  display: flex;
+  flex-direction:row-reverse; 
+  gap: 10px; 
+  width: 100%;
+  height: 100%;
+  
+}
+
+ .top_buttons_div {
+
+    width: 100%;
+    height: 5vh;
+    margin-top: auto;
+      
+ }
+
+ .characters_picnic {
+    background-image: url("../assets/main_page_assets/foveo.png");
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+    background-size: 800px 600px;
+ }
+
+
+ .row_flex_container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: 100%;
+
+ }
+
+
+ .logo_image {
+
+  cursor: pointer;
+
+
+ }
+
+
+
+
+.main_colored_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  
+  background-image:linear-gradient(rgba(70, 129, 255, 0.603), rgba(184, 5, 184, 0.577));
+  background-blend-mode:darken;
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+
+
+
+ .news_colored_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  
+  background-image:linear-gradient(rgba(102, 255, 166, 0.603), rgba(25, 0, 255, 0.377));
+  background-blend-mode:darken;
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -1;
+
+
+
+}
+
+.minigame_colored_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  
+  background-image:linear-gradient(rgb(180, 11, 247), rgba(0, 255, 191, 0.377));
+  background-blend-mode:darken;
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+
+
+.projects_colored_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  
+  background-image:linear-gradient(rgba(255, 209, 6, 0.603), rgba(255, 0, 255, 0.377));
+  background-blend-mode:darken;
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+
+
+.portfolio_colored_background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  
+  background-image:linear-gradient(rgb(255, 0, 0), rgba(0, 255, 200, 0.377));
+  background-blend-mode:darken;
+  background-size: cover;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+
+
+.bio_container {
+    display: flex;        
+    align-items: center;  
+    gap: 20px;             
+}
+
+.bio_text {
+    align-self:self-start;
+    max-width:fit-content;  
+    font-size: 1.5dvh;
+}

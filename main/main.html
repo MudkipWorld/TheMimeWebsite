@@ -1,0 +1,178 @@
+ <!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="../news/news.css"/>
+    <link rel="stylesheet" href="../main/main.css"> 
+</head>
+<body >
+    <div class="flex-container">
+      
+        <div class="row_flex_container">
+          
+          <img src="../assets/main_page_assets/logo.png" height=150 alt="Mime Logo" onclick="loadPage('')" align="left" class="logo_image"/>
+            <div class="top_buttons_div">
+              
+            <div class="top_buttons_container">
+              <button class="top_buttons green"  onclick="loadPage('../games/games.html')">Mini Games</button>
+              <button class="top_buttons yellow" onclick="loadPage('../projects/projects.html')">Projects</button>
+              <button class="top_buttons blue"   onclick="loadPage('../news/news.html')">News</button>
+            </div>
+
+            </div>
+            
+        </div>
+
+        <div class="bodybg">
+            <div id="subview" style="font-family: 'MouldyCheese'">
+              <h1 align="center">Welcome!</h1>
+              <h2 align="center">Feel free to look around!</h2>
+              <div class="main_colored_background"></div>
+              <div class="main_container">
+              <img src="../assets/main_page_assets/me.png" height=500 alt="me"/>
+              <div class="news_background"><p class="bio_text">
+                    Hello! I am TheMime. I am an artist, animator and a programmer. I am mainly known for developing PNGTube-Remix and in tiny communities, being the developer behind Unique Aquarium. This is my official page. Feel free to take a look! 
+                    <br>You can check some news/ updates here and play some games too!
+                    <br>
+                    <br>
+                    <br>(Idk how to make websites, help.)</div>
+                </p>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html> 
+
+
+<script src="../games/games/TestExport/CatCross.js"></script>
+<script>
+  // Customize Godot load into a specific div
+  const engine = new Engine({
+    canvasResizePolicy: 0, // "none"
+    canvas: document.createElement('canvas'),
+    locateFile: (path) => path,
+  });
+
+</script>
+
+
+<script>
+const originalSubviewHTML = document.getElementById("subview").innerHTML;
+function loadPage(page) {
+    if (page == '') {
+        document.getElementById("subview").innerHTML = originalSubviewHTML;
+        sessionStorage.removeItem("lastPage");
+        return;
+    }
+
+    fetch(page)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("subview").innerHTML = html;
+            sessionStorage.setItem("lastPage", page);
+            setupFullscreen(); // <-- run after the new content is inserted
+        })
+        .catch(error => {
+            document.getElementById("subview").innerHTML = "Error!";
+        });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    const lastPage = sessionStorage.getItem("lastPage");
+    if (lastPage) {
+        loadPage(lastPage);
+    }
+});
+
+
+
+
+function loadPageGame(page, game) {
+    if (page == '') {
+        document.getElementById("subview").innerHTML = originalSubviewHTML;
+        sessionStorage.removeItem("lastPage");
+        return;
+    }
+
+    fetch(page)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("subview").innerHTML = html;
+            sessionStorage.setItem("lastPage", page);
+            setupFullscreen();
+            load_game(game);
+
+        })
+        .catch(error => {
+            document.getElementById("subview").innerHTML = "Error!";
+        });
+}
+
+
+
+
+
+function load_game(url) {
+    // Hide grid
+    document.getElementById('gameGrid').style.display = 'none';
+    // Show game player
+    document.getElementById('GamePlayer').style.display = 'block';
+    // Load iframe
+    const iframe = document.getElementById('GameEmbed');
+    iframe.src = url;
+}
+
+function exit_game() {
+    // Stop the game
+    const iframe = document.getElementById('GameEmbed');
+    iframe.src = '';
+    // Hide player, show grid
+    document.getElementById('GamePlayer').style.display = 'none';
+    document.getElementById('gameGrid').style.display = 'contents';
+}
+
+// Optional: fullscreen toggle
+document.getElementById('fullscreenButton').addEventListener('click', function() {
+    const iframe = document.getElementById('GameEmbed');
+    if (iframe.requestFullscreen) iframe.requestFullscreen();
+});
+
+function resize_iframe_to_canvas() {
+  const iframe = document.getElementById('GameEmbed');
+  if (!iframe || !iframe.contentWindow) return;
+  const canvas = iframe.contentWindow.document.getElementById('canvas');
+  if (!canvas) return;
+  canvas.width = iframe.clientWidth + "px";
+  canvas.height = iframe.clientHeight + "px";
+}
+
+function setupFullscreen() {
+  const fullscreenButton = document.getElementById('fullscreenButton');
+  const iframeWrapper = document.getElementById('game_wrapper');
+
+  if (!fullscreenButton || !iframeWrapper) return;
+
+  fullscreenButton.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      if (iframeWrapper.requestFullscreen) iframeWrapper.requestFullscreen();
+      else if (iframeWrapper.webkitRequestFullscreen) iframeWrapper.webkitRequestFullscreen();
+      else if (iframeWrapper.msRequestFullscreen) iframeWrapper.msRequestFullscreen();
+      fullscreenButton.textContent = 'Fullscreen';
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
+      fullscreenButton.textContent = 'Fullscreen';
+    }
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+    if (fullscreenButton)
+      fullscreenButton.textContent = document.fullscreenElement ? 'Fullscreen' : 'Fullscreen';
+  });
+}
+
+window.addEventListener('resize', resize_iframe_to_canvas);
+</script>
