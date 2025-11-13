@@ -4,72 +4,78 @@
   <meta charset="UTF-8" />
   <title>Unique Aquarium</title>
 
-    <link rel="stylesheet" href="../../news/news.css"/>
-    <link rel="stylesheet" href="../unique_aquarium_page/uapage.css"> 
-    <link rel="stylesheet" href="../games.css"> 
+  <link rel="stylesheet" href="../../news/news.css?v=<?= new Date().getTime() ?>" />
+  <link rel="stylesheet" href="../unique_aquarium_page/uapage.css?v=<?= new Date().getTime() ?>" /> 
+  <link rel="stylesheet" href="../games.css?v=<?= new Date().getTime() ?>" /> 
+
+  <script>
+    const ts = new Date().getTime();
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            link.href += "?v=" + ts;
+        });
+    });
+  </script>
 </head>
-<body >
-    <div class="flex-container">
-      
-        <div class="row_flex_container">
-          
-          <img src="../../assets/main_page_assets/themime_logo.svg" alt="Mime Logo" onclick="loadPage('../../main/main.html')" class="logo_image"/>
-            <div class="top_buttons_div">
-              
-            <img src="../../games/unique_aquarium_page/BannerBig.png" >
+<body>
+  <div class="flex-container">
+    <div class="row_flex_container">
+      <img src="../../assets/main_page_assets/themime_logo.svg" alt="Mime Logo"
+           onclick="loadPage('../../main/main.html')" class="logo_image"/>
+      <div class="top_buttons_div">
+        <img src="../../games/unique_aquarium_page/BannerBig.png" >
+      </div>
+    </div>
 
+    <div class="bodybg">
+      <div id="subview" style="font-family: 'MouldyCheese'">
+        <div class="main_colored_background"></div>
+        <div class="main_container">
+          <div id="GamePlayer" class="centered_container" style="display:flex;">
+            <div class="minigames_top_buttons_container">
+              <button id="fullscreenButton" class="top_minigames_toggles">Fullscreen</button>
+              <button onclick="exit_game()" class="top_minigames_toggles">Back</button>
             </div>
-            
-        </div>
-
-        
-
-        <div class="bodybg">
-            <div id="subview" style="font-family: 'MouldyCheese'">
-              <div class="main_colored_background"></div>
-              <div class="main_container">
-
-              <div id="GamePlayer" class="centered_container" style="display:flex;">
-                <div class="minigames_top_buttons_container">
-                  <button id="fullscreenButton" class="top_minigames_toggles">Fullscreen</button>
-                  <button onclick="exit_game()" class="top_minigames_toggles">Back</button>
-                </div>
-                <div class="iframe_wrapper" id="game_wrapper">
-                  <iframe class="game_embed" id="GameEmbed" scrolling="no" src='../../games/games/unique_aquarium/unique_aquarium.html'></iframe>
-                </div>
+            <div class="iframe_wrapper" id="game_wrapper">
+              <iframe class="game_embed" id="GameEmbed" scrolling="no"></iframe>
+            </div>
             <p align="center">
-              Note: if any of the games have a save and you want to backup, check the Settings in game and see the Backups section.<br>
-            
+              Note: if any of the games have a save and you want to backup, check the Settings in game and see the Backups section.
+              <br>You will have a download of the save file. If you never played the game before on your Desktop. Make sure it is named "backup.savedata" and put it next to the executable.
+              <br>If you already had a save file, but wish to continue the one from web. look for the %appdata%/Roaming/Godot and look for Unique Aquarium inside the user apps folder and paste the downloaded save there.
             </p>
             <a href="https://discord.gg/QtvDjY4t42" target="_blank" rel="noopener noreferrer">
-                  <button class="play_button" style="display: contents;">
-                      <p align="right">Discord!</p>
-                  </button>
-              </a>
-
-
-            </div>
-
-            </div>
+              <button class="play_button" style="display: contents;">
+                <p align="right">Discord!</p>
+              </button>
+            </a>
+            <a href="https://ko-fi.com/themime2111"  target="_blank" rel="noopener noreferrer">
+                <button class="play_button" style="display: contents;">
+                    <p align="right">Buy me Kofi!</p>
+                </button>
+            </a>  
+          </div>
         </div>
+      </div>
     </div>
-     </div>
+  </div>
 
 <script>
+const timestamp = new Date().getTime();
+
+// Load iframe with cache-busting
+document.getElementById('GameEmbed').src = '../../games/games/unique_aquarium/unique_aquarium.html?v=' + timestamp;
+
+// Redirect/load page functions
 function loadPage(page) {
-
-    window.location.href = page;
-
-
+    window.location.href = page + '?v=' + timestamp;
 }
-
-
 
 function exit_game() {
-    loadPage('../../main/main.html')
+    loadPage('../../main/main.html');
 }
 
-// Optional: fullscreen toggle
+// Fullscreen toggle
 document.getElementById('fullscreenButton').addEventListener('click', function() {
     const iframe = document.getElementById('GameEmbed');
     if (iframe.requestFullscreen) iframe.requestFullscreen();
@@ -87,7 +93,6 @@ function resize_iframe_to_canvas() {
 function setupFullscreen() {
   const fullscreenButton = document.getElementById('fullscreenButton');
   const iframeWrapper = document.getElementById('game_wrapper');
-
   if (!fullscreenButton || !iframeWrapper) return;
 
   fullscreenButton.addEventListener('click', () => {
@@ -107,11 +112,10 @@ function setupFullscreen() {
   document.addEventListener('fullscreenchange', () => {
     if (fullscreenButton)
       fullscreenButton.textContent = document.fullscreenElement ? 'Fullscreen' : 'Fullscreen';
-  });}
+  });
+}
 
-
-
-
+// Adjust banner height to match logo
 window.addEventListener('load', matchBannerHeight);
 window.addEventListener('resize', matchBannerHeight);
 
@@ -123,13 +127,7 @@ function matchBannerHeight() {
     banner.style.width = 'auto';
   }
 }
-
-
-
-
 </script>
 
-
-
 </body>
-</html> 
+</html>
