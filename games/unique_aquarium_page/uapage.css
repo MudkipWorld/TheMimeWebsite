@@ -51,22 +51,22 @@ body {
   background-blend-mode: normal;
   background-position: center;
   
-  height: auto;
+  box-sizing:content-box ;
+  height: 100vh;
+  padding-bottom: 2rem;
   margin: 0;
-  padding-bottom: 5vh;
-  overflow: hidden;
+  overflow:auto;
 }
 
 
 .bodybg {
   position: relative;
-  height: 100vh;
   background-color: rgba(160, 255, 223, 0.473);
   border-radius: 20px;
   padding: 4vh 3vw; 
   margin: 0;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
 }
 
 
@@ -138,8 +138,6 @@ body {
 
 
 
-
-
  .characters_picnic {
     background-image: url("../../assets/main_page_assets/foveo.png");
     background-repeat:no-repeat;
@@ -165,76 +163,6 @@ body {
 }
 
 
-
-
- .news_colored_background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.5;
-  
-  background-image:linear-gradient(rgba(102, 255, 166, 0.603), rgba(25, 0, 255, 0.377));
-  background-blend-mode:darken;
-  background-size: cover;
-  background-repeat: no-repeat;
-  z-index: -1;
-
-
-
-}
-
-.minigame_colored_background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.5;
-  
-  background-image:linear-gradient(rgb(180, 11, 247), rgba(0, 255, 191, 0.377));
-  background-blend-mode:darken;
-  background-size: cover;
-  background-repeat: no-repeat;
-  z-index: -1;
-}
-
-
-
-.projects_colored_background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.5;
-  
-  background-image:linear-gradient(rgba(255, 209, 6, 0.603), rgba(255, 0, 255, 0.377));
-  background-blend-mode:darken;
-  background-size: cover;
-  background-repeat: no-repeat;
-  z-index: -1;
-}
-
-
-
-.portfolio_colored_background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.5;
-  
-  background-image:linear-gradient(rgb(255, 0, 0), rgba(0, 255, 200, 0.377));
-  background-blend-mode:darken;
-  background-size: cover;
-  background-repeat: no-repeat;
-  z-index: -1;
-}
-
-
 @media (max-width: 720px) {
 .row_flex_container {
   display: flex;
@@ -253,14 +181,4 @@ body {
     align-items: center;
   }
 
-  .bio_text {
-    text-align: center;
-    font-size: 1em;
-  }
-}
-.bio_image {
-  width: clamp(25rem, 5rem, 25rem);
-  height: auto;
-  border-radius: 12px;
-  flex-shrink: 0;
 }
