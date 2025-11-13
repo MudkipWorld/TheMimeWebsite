@@ -7,6 +7,15 @@
   <link rel="stylesheet" href="../../news/news.css?v=<?= new Date().getTime() ?>" />
   <link rel="stylesheet" href="../unique_aquarium_page/uapage.css?v=<?= new Date().getTime() ?>" /> 
   <link rel="stylesheet" href="../games.css?v=<?= new Date().getTime() ?>" /> 
+
+  <script>
+    const ts = new Date().getTime();
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            link.href += "?v=" + ts;
+        });
+    });
+  </script>
 </head>
 <body>
   <div class="flex-container">
@@ -55,7 +64,7 @@
 const timestamp = new Date().getTime();
 
 // Load iframe with cache-busting
-document.getElementById('GameEmbed').src = '../../games/games/unique_aquarium/unique_aquarium.html';
+document.getElementById('GameEmbed').src = '../../games/games/unique_aquarium/unique_aquarium.html?v=' + timestamp;
 
 // Redirect/load page functions
 function loadPage(page) {
