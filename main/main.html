@@ -15,6 +15,7 @@
             <div class="top_buttons_container">
               <button class="top_buttons blue"   onclick="loadPage('../news/news.html')">News</button>
               <button class="top_buttons yellow" onclick="loadPage('../projects/projects.html')">Projects</button>
+              <button class="top_buttons blue" onclick="loadNewPage('../games/unique_aquarium_page/uapage.html')">Aquarium</button>
               <button class="top_buttons green"  onclick="loadPage('../games/games.html')">Mini Games</button>
             </div>
 
@@ -96,6 +97,14 @@ window.addEventListener("DOMContentLoaded", () => {
         loadPage(lastPage);
     }
 });
+
+
+function loadNewPage(page) {
+
+    window.location.href = page;
+
+
+}
 
 
 

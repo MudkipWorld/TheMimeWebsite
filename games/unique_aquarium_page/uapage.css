@@ -1,27 +1,75 @@
 @font-face {
   font-family: 'MouldyCheese';
-  src: url('../assets/font1.ttf') format('truetype');
+  src: url('../../assets/font1.ttf') format('truetype');
   font-style:normal;
   font-weight: 900;
 }
 
 
+.row_flex_container {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+}
+
+.logo_image {
+  width: clamp(80px, 15vw, 200px);
+  height: auto;
+  cursor: pointer;
+  transition: filter 0.3s ease;
+}
+
+.logo_image:hover {
+  filter: drop-shadow(0 0 10px rgba(152, 182, 247, 0.5))
+          drop-shadow(0 0 15px rgba(70, 129, 255, 0.5));
+}
+
+
+.top_buttons_div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+}
+
+.top_buttons_div img {
+  height: auto; 
+  width: clamp(80px, 15vw, 200px);
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.25);
+}
+
+
 
 body {
-  background-image: url("../assets/main_page_assets/main_page.png"),
-                    linear-gradient(rgb(27, 172, 240), rgb(27, 172, 240), #ffffff, green, green);
+  background-image: url("../../assets/main_page_assets/wallpaper2.svg"),
+                    linear-gradient(rgb(27, 172, 240), rgb(27, 172, 240), #ffffff, rgb(7, 25, 117), rgb(17, 4, 100));
   background-repeat: no-repeat;
   background-size: cover, cover;
   background-attachment: fixed, fixed;
   background-blend-mode: normal;
-
-  background-position: clamp(10%, 50vw - 20vh, 50%) center;
-
+  background-position: center;
+  
   height: auto;
   margin: 0;
   padding-bottom: 5vh;
   overflow: hidden;
 }
+
+
+.bodybg {
+  position: relative;
+  height: 100vh;
+  background-color: rgba(160, 255, 223, 0.473);
+  border-radius: 20px;
+  padding: 4vh 3vw; 
+  margin: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+
 
 
 .flex-container {
@@ -31,19 +79,10 @@ body {
   margin: auto;
 }
 
-.bodybg {
-  position: relative;
-  background-color: rgba(160, 255, 223, 0.473);
-  border-radius: 20px;
-  padding: 4vh 3vw; 
-  margin: 0;
-  box-sizing: border-box;
-  overflow: hidden;
-}
 
 .top_buttons {
 
-  background-image: url("../assets/main_page_assets/buttom_monochrome.svg");
+  background-image: url("../../assets/main_page_assets/buttom_monochrome.svg");
   background-repeat: no-repeat;
   background-size:contain;
   background-position: center; 
@@ -55,9 +94,9 @@ body {
   display: block;
   align-items: center;
 
-  width: clamp(6.5rem, 0.1rem, 8rem);
-  height: 8rem;  
-  font-size: clamp(1rem, 0.1rem, 1.5rem);
+  width: clamp(8rem, 1.5rem, 8rem);
+  height: 7.8rem;  
+  font-size: clamp(1.2rem, 0.5rem, 1.5rem);
   font-weight: bold;
   cursor: pointer;
   filter: drop-shadow(5px 0px 2px rgba(20, 7, 192, 0.24));
@@ -100,40 +139,14 @@ body {
 
 
 
- .top_buttons_div {
-
-    width: 100%;
-    margin-top: auto;
-      
- }
 
  .characters_picnic {
-    background-image: url("../assets/main_page_assets/foveo.png");
+    background-image: url("../../assets/main_page_assets/foveo.png");
     background-repeat:no-repeat;
     background-attachment:fixed;
     background-size: 800px 600px;
  }
 
-
- .row_flex_container {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  height: 100%;
-
- }
-
-.logo_image {
-  width: clamp(80px, 15vw, 200px);
-  height: auto;
-  cursor: pointer;
-  transition: filter 0.3s ease;
-}
-
-.logo_image:hover {
-  filter: drop-shadow(0 0 10px rgba(152, 182, 247, 0.5))
-          drop-shadow(0 0 15px rgba(70, 129, 255, 0.5));
-}
 
 
 .main_colored_background {

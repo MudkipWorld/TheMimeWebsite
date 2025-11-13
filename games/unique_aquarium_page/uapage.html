@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Unique Aquarium</title>
+
+    <link rel="stylesheet" href="../../news/news.css"/>
+    <link rel="stylesheet" href="../unique_aquarium_page/uapage.css"> 
+    <link rel="stylesheet" href="../games.css"> 
+</head>
+<body >
+    <div class="flex-container">
+      
+        <div class="row_flex_container">
+          
+          <img src="../../assets/main_page_assets/themime_logo.svg" alt="Mime Logo" onclick="loadPage('../../main/main.html')" class="logo_image"/>
+            <div class="top_buttons_div">
+              
+            <img src="../../games/unique_aquarium_page/BannerBig.png" >
+
+            </div>
+            
+        </div>
+
+        
+
+        <div class="bodybg">
+            <div id="subview" style="font-family: 'MouldyCheese'">
+              <div class="main_colored_background"></div>
+              <div class="main_container">
+
+              <div id="GamePlayer" class="centered_container" style="display:flex;">
+                <div class="minigames_top_buttons_container">
+                  <button id="fullscreenButton" class="top_minigames_toggles">Fullscreen</button>
+                  <button onclick="exit_game()" class="top_minigames_toggles">Back</button>
+                </div>
+                <div class="iframe_wrapper" id="game_wrapper">
+                  <iframe class="game_embed" id="GameEmbed" scrolling="no" src='../../games/games/unique_aquarium/unique_aquarium.html'></iframe>
+                </div>
+            <p align="center">
+              Note: if any of the games have a save and you want to backup, check the Settings in game and see the Backups section.<br>
+            
+            </p>
+            <a href="https://discord.gg/QtvDjY4t42" target="_blank" rel="noopener noreferrer">
+                  <button class="play_button" style="display: contents;">
+                      <p align="right">Discord!</p>
+                  </button>
+              </a>
+
+
+            </div>
+
+            </div>
+        </div>
+    </div>
+     </div>
+
+<script>
+function loadPage(page) {
+
+    window.location.href = page;
+
+
+}
+
+
+
+function exit_game() {
+    loadPage('../../main/main.html')
+}
+
+// Optional: fullscreen toggle
+document.getElementById('fullscreenButton').addEventListener('click', function() {
+    const iframe = document.getElementById('GameEmbed');
+    if (iframe.requestFullscreen) iframe.requestFullscreen();
+});
+
+function resize_iframe_to_canvas() {
+  const iframe = document.getElementById('GameEmbed');
+  if (!iframe || !iframe.contentWindow) return;
+  const canvas = iframe.contentWindow.document.getElementById('canvas');
+  if (!canvas) return;
+  canvas.width = iframe.clientWidth + "px";
+  canvas.height = iframe.clientHeight + "px";
+}
+
+function setupFullscreen() {
+  const fullscreenButton = document.getElementById('fullscreenButton');
+  const iframeWrapper = document.getElementById('game_wrapper');
+
+  if (!fullscreenButton || !iframeWrapper) return;
+
+  fullscreenButton.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      if (iframeWrapper.requestFullscreen) iframeWrapper.requestFullscreen();
+      else if (iframeWrapper.webkitRequestFullscreen) iframeWrapper.webkitRequestFullscreen();
+      else if (iframeWrapper.msRequestFullscreen) iframeWrapper.msRequestFullscreen();
+      fullscreenButton.textContent = 'Fullscreen';
+    } else {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      else if (document.msExitFullscreen) document.msExitFullscreen();
+      fullscreenButton.textContent = 'Fullscreen';
+    }
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+    if (fullscreenButton)
+      fullscreenButton.textContent = document.fullscreenElement ? 'Fullscreen' : 'Fullscreen';
+  });}
+
+
+
+
+window.addEventListener('load', matchBannerHeight);
+window.addEventListener('resize', matchBannerHeight);
+
+function matchBannerHeight() {
+  const logo = document.querySelector('.logo_image');
+  const banner = document.querySelector('.top_buttons_div img');
+  if (logo && banner) {
+    banner.style.height = logo.clientHeight + 'px';
+    banner.style.width = 'auto';
+  }
+}
+
+
+
+
+</script>
+
+
+
+</body>
+</html> 
