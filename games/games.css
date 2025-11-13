@@ -132,6 +132,7 @@ canvas {
   gap: 1rem;
   justify-content: flex-start;
   padding: 1rem 0;
+  box-sizing: content-box;
 }
 
 .card {
