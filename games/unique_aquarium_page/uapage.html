@@ -7,15 +7,6 @@
   <link rel="stylesheet" href="../../news/news.css?v=<?= new Date().getTime() ?>" />
   <link rel="stylesheet" href="../unique_aquarium_page/uapage.css?v=<?= new Date().getTime() ?>" /> 
   <link rel="stylesheet" href="../games.css?v=<?= new Date().getTime() ?>" /> 
-
-  <script>
-    const ts = new Date().getTime();
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
-            link.href += "?v=" + ts;
-        });
-    });
-  </script>
 </head>
 <body>
   <div class="flex-container">
@@ -71,17 +62,17 @@ const timestamp = () => new Date().getTime();
 
 function loadGame() {
     const wrapper = document.getElementById('game_wrapper');
-
     wrapper.innerHTML = '';
 
     const iframe = document.createElement('iframe');
     iframe.className = 'game_embed';
     iframe.scrolling = 'no';
 
-    iframe.src = '../../games/games/unique_aquarium/unique_aquarium.html?v=' + timestamp();
+    iframe.src = '../../games/games/unique_aquarium/unique_aquarium.html';
 
     wrapper.appendChild(iframe);
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     loadGame();
