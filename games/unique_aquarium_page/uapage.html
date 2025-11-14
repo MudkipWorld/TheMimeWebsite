@@ -16,6 +16,48 @@
         });
     });
   </script>
+  
+
+<style>
+@media screen and (max-width: 900px) and (orientation: portrait) {
+    #game_wrapper {
+        transform: rotate(90deg);
+        transform-origin: left top;
+        width: 100vh;   
+        height: 100vw; 
+        overflow: hidden;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #000; 
+    }
+
+    #game_wrapper iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+}
+
+#rotateNotice {
+    display: none;
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    color: #fff;
+    text-align: center;
+    line-height: 100vh;
+    font-size: 1.5rem;
+    z-index: 9999;
+}
+</style>
+
 </head>
 <body>
   <div class="flex-container">
@@ -61,73 +103,60 @@
   </div>
 
 <script>
-const timestamp = new Date().getTime();
+const timestamp = () => new Date().getTime();
+function loadGame() {
+    const wrapper = document.getElementById('game_wrapper');
 
-// Load iframe with cache-busting
-document.getElementById('GameEmbed').src = '../../games/games/unique_aquarium/unique_aquarium.html?v=' + timestamp;
+    wrapper.innerHTML = '';
 
-// Redirect/load page functions
-function loadPage(page) {
-    window.location.href = page + '?v=' + timestamp;
+    const iframe = document.createElement('iframe');
+    iframe.className = 'game_embed';
+    iframe.scrolling = 'no';
+    iframe.src = '../../games/games/unique_aquarium/unique_aquarium.html?v=' + timestamp();
+
+    wrapper.appendChild(iframe);
+
+    resize_iframe_to_canvas();
 }
 
-function exit_game() {
-    loadPage('../../main/main.html');
-}
 
-// Fullscreen toggle
-document.getElementById('fullscreenButton').addEventListener('click', function() {
-    const iframe = document.getElementById('GameEmbed');
-    if (iframe.requestFullscreen) iframe.requestFullscreen();
-});
+function checkOrientation() {
+    const notice = document.getElementById('rotateNotice');
+    const wrapper = document.getElementById('game_wrapper');
+    if(window.innerHeight > window.innerWidth){ 
+        notice.style.display = 'block';
+        wrapper.style.display = 'none';
+    } else { 
+        notice.style.display = 'none';
+        wrapper.style.display = 'flex';
+    }
+}
 
 function resize_iframe_to_canvas() {
-  const iframe = document.getElementById('GameEmbed');
-  if (!iframe || !iframe.contentWindow) return;
-  const canvas = iframe.contentWindow.document.getElementById('canvas');
-  if (!canvas) return;
-  canvas.width = iframe.clientWidth + "px";
-  canvas.height = iframe.clientHeight + "px";
+    const iframe = document.querySelector('#game_wrapper iframe');
+    if (!iframe || !iframe.contentWindow) return;
+    const canvas = iframe.contentWindow.document.getElementById('canvas');
+    if (!canvas) return;
+    canvas.width = iframe.clientWidth + "px";
+    canvas.height = iframe.clientHeight + "px";
 }
 
-function setupFullscreen() {
-  const fullscreenButton = document.getElementById('fullscreenButton');
-  const iframeWrapper = document.getElementById('game_wrapper');
-  if (!fullscreenButton || !iframeWrapper) return;
-
-  fullscreenButton.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-      if (iframeWrapper.requestFullscreen) iframeWrapper.requestFullscreen();
-      else if (iframeWrapper.webkitRequestFullscreen) iframeWrapper.webkitRequestFullscreen();
-      else if (iframeWrapper.msRequestFullscreen) iframeWrapper.msRequestFullscreen();
-      fullscreenButton.textContent = 'Fullscreen';
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen();
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-      else if (document.msExitFullscreen) document.msExitFullscreen();
-      fullscreenButton.textContent = 'Fullscreen';
+document.getElementById('fullscreenButton').addEventListener('click', function() {
+    const iframe = document.querySelector('#game_wrapper iframe');
+    if (iframe.requestFullscreen) {
+        iframe.requestFullscreen({navigationUI: 'hide'});
     }
-  });
+});
 
-  document.addEventListener('fullscreenchange', () => {
-    if (fullscreenButton)
-      fullscreenButton.textContent = document.fullscreenElement ? 'Fullscreen' : 'Fullscreen';
-  });
-}
+document.addEventListener('DOMContentLoaded', () => {
+    loadGame();
+    checkOrientation();
+});
 
-// Adjust banner height to match logo
-window.addEventListener('load', matchBannerHeight);
-window.addEventListener('resize', matchBannerHeight);
-
-function matchBannerHeight() {
-  const logo = document.querySelector('.logo_image');
-  const banner = document.querySelector('.top_buttons_div img');
-  if (logo && banner) {
-    banner.style.height = logo.clientHeight + 'px';
-    banner.style.width = 'auto';
-  }
-}
+window.addEventListener('resize', checkOrientation);
+window.addEventListener('orientationchange', checkOrientation);
 </script>
+
 
 </body>
 </html>
