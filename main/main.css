@@ -20,7 +20,7 @@ body {
   height: auto;
   margin: 0;
   padding-bottom: 5vh;
-  overflow: hidden;
+  overflow: auto;
 }
 
 
@@ -42,10 +42,9 @@ body {
 }
 
 .top_buttons {
-
   background-image: url("../assets/main_page_assets/buttom_monochrome.svg");
   background-repeat: no-repeat;
-  background-size:contain;
+  background-size: contain;
   background-position: center; 
   background-color: transparent;
   border: none;
@@ -60,18 +59,16 @@ body {
   font-size: clamp(1rem, 0.1rem, 1.5rem);
   font-weight: bold;
   cursor: pointer;
-  filter: drop-shadow(5px 0px 2px rgba(20, 7, 192, 0.24));
   font-family: 'MouldyCheese', sans-serif;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  
+
+  overflow: visible;
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 .top_buttons:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  transform: translateY(-5px);
+  filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
 }
-
-
 
 
 .top_buttons.green {
@@ -86,6 +83,35 @@ body {
   filter: sepia(1) saturate(500%) brightness(75%) contrast(150%) hue-rotate(165deg);
 }
 
+.top_buttons.green:hover {
+  transform: translateY(-5px);
+  filter: sepia(1) saturate(500%) brightness(76%) contrast(150%) hue-rotate(90deg)
+          drop-shadow(0 8px 15px rgba(0, 57, 3, 0.5));
+}
+
+.top_buttons.yellow:hover {
+  transform: translateY(-5px);
+  filter: sepia(1) saturate(300%) hue-rotate(25deg)
+          drop-shadow(0 8px 15px rgba(53, 52, 0, 0.5));
+}
+
+.top_buttons.blue:hover {
+  transform: translateY(-5px);
+  filter: sepia(1) saturate(500%) brightness(75%) contrast(150%) hue-rotate(165deg)
+          drop-shadow(0 8px 15px rgba(0, 42, 68, 0.5));
+}
+
+
+.top_buttons.darkblue {
+  filter: sepia(1) saturate(500%) brightness(70%) contrast(150%) hue-rotate(170deg);
+}
+
+
+.top_buttons.darkblue:hover {
+  transform: translateY(-5px);
+  filter: sepia(1) saturate(500%) brightness(70%) contrast(150%) hue-rotate(170deg)
+          drop-shadow(0 8px 15px rgba(0, 42, 68, 0.5));
+}
 
 
 .top_buttons_container {
