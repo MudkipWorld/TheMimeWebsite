@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1764095782|60406538';
+const CACHE_VERSION = '1764096081|37566477';
 /** @type {string} */
 const CACHE_PREFIX = 'Unique Aquarium-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
