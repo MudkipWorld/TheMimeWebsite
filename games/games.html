@@ -4,20 +4,17 @@
   <meta charset="UTF-8">
   <title>Games and Demos!</title>
 
-  <!-- Styles -->
   <link rel="stylesheet" href="../news/news.css">
   <link rel="stylesheet" href="../games/games.css">
   <link rel="stylesheet" href="../main/main.css">
 <script>
   const ts = new Date().getTime();
 
-  // Append cache-busting query to all CSS files
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
       link.href += "?v=" + ts;
     });
 
-    // Append cache-busting to JS scripts
     document.querySelectorAll('script[src]').forEach(script => {
       script.src += "?v=" + ts;
     });
@@ -40,11 +37,11 @@
       <img src="../games/games/cross_cat/cross_cat.png" alt="Cat">
       <p>Cat Breeder (Concept)</p>
     </button>
-    <!--
+
     <button class="card" onclick="load_game('../games/games/unique_aquarium/unique_aquarium.html', 1280, 720)">
       <img src="../assets/logos/unique_aquarium_logo.png" alt="uniqueA">
-      <p>Unique Aquarium (Alpha)</p>
-    </button>-->
+      <p>Unique Aquarium (Demo)</p>
+    </button>
 
     <button class="card" disabled>
       <img src="../games/games/Placeholder.png" alt="?">
