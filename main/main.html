@@ -18,6 +18,13 @@
     </script>
 </head>
 <body>
+    <div class="scene">
+    <div class="layer stars_gradient"></div>
+    <div class="layer bg"></div>
+    <!--<div class="layer char"></div>-->
+    <div class="layer middle"></div>
+    <div class="layer front"></div>
+    </div>
     <div class="flex-container">
         <div class="row_flex_container" >
             <img src="../assets/main_page_assets/themime_logo.svg" alt="Mime Logo" onclick="loadPage('')" class="logo_image"/>
@@ -25,8 +32,7 @@
                 <div class="top_buttons_container">
                     <button class="top_buttons blue"   onclick="loadPage('../news/news.html')">News</button>
                     <button class="top_buttons yellow" onclick="loadPage('../projects/projects.html')">Projects</button>
-                    <!--<button class="top_buttons darkblue" onclick="loadNewPage('../games/unique_aquarium_page/uapage.html')">Aquarium</button>-->
-                    
+                    <button class="top_buttons darkblue" onclick="loadPage('../portfolio/portfolio.html')">Portflio</button>
                 </div>
                 <button class="top_buttons green"  onclick="loadPage('../games/games.html')">Play</button>
                 
@@ -58,7 +64,7 @@
             </div>
         </div>
     </div>
-
+    
     <script src="../games/games/TestExport/CatCross.js?v=<?= new Date().getTime() ?>"></script>
 
 <script>
@@ -107,7 +113,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-
 function loadNewPage(page) {
     window.location.href = page + "?v=" + timestamp;
 }
@@ -145,7 +150,6 @@ function load_game(url, width = 1280, height = 720) {
     const wrapper = document.getElementById('game_wrapper');
     if (wrapper) wrapper.style.aspectRatio = `${width} / ${height}`;
 }
-
 
 function exit_game() {
     const iframe = document.getElementById('GameEmbed');
@@ -190,3 +194,4 @@ function setupFullscreen() {
 
 window.addEventListener('resize', resize_iframe_to_canvas);
 </script>
+</body>

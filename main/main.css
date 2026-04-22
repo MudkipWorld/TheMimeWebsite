@@ -5,24 +5,59 @@
   font-weight: 900;
 }
 
-
-
-body {
-  background-image: url("../assets/main_page_assets/main_page_placeholder.svg"),
-                    linear-gradient(rgb(99, 67, 212), rgb(27, 172, 240), #ffffff, green, green);
-  background-repeat: no-repeat;
-  background-size: cover, cover;
-  background-attachment: fixed, fixed;
-  background-blend-mode: normal;
-
-  background-position: clamp(10%, 50vw - 20vh, 50%) center;
-
-  height: auto;
-  margin: 0;
-  padding-bottom: 5rem;
-  overflow: auto;
+.scene {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
 }
 
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.stars_gradient {
+  background-image:  
+                    url("../assets/main_page_assets/stars.png"),
+                    linear-gradient(rgb(99, 67, 212), rgb(27, 172, 240), #ffffff, rgb(67, 140, 33));
+  background-size : auto;
+  background-position: 100% bottom;
+
+}
+
+.bg {
+  background-image:  
+                    url("../assets/main_page_assets/main_page_placeholder2.svg"), 
+                    url("../assets/main_page_assets/main_page_placeholder_back.svg"), 
+                    url("../assets/main_page_assets/main_page_placeholder_far_back.svg");
+  background-repeat: no-repeat;
+  background-size : 100%;
+  background-position: 100% bottom;
+}
+
+.char {
+  position: absolute;
+  inset: 0;
+
+  background: url("../assets/main_page_assets/placeholders/pickles.png");
+  background-repeat: no-repeat;
+  background-size: 14.5%;
+  background-position: 100% bottom;
+}
+
+.middle {
+  background-image: url("../assets/main_page_assets/main_page_placeholder.svg");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: 100% bottom;
+}
+
+.front {
+  background-image: url("../assets/main_page_assets/main_page_placeholder_front.svg");
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: 100% bottom;
+}
 
 .flex-container {
   display: flex;
@@ -35,7 +70,7 @@ body {
   position: relative;
   background-color: rgba(160, 255, 223, 0.35);
   border-radius: 20px;
-  padding: 4vh 3vw; 
+  padding: 6vh 6vw; 
   margin: 0;
   box-sizing: border-box;
   overflow: hidden;
@@ -122,7 +157,6 @@ body {
   height: 5rem;
 }
 
-
  .top_buttons_div {
     width: 100%;
     margin-top: auto;
@@ -137,7 +171,6 @@ body {
     background-size: 800px 600px;
  }
 
-
  .row_flex_container {
   display: flex;
   width: 100%;
@@ -146,6 +179,7 @@ body {
  }
 
 .logo_image {
+  position:absolute;
   width: clamp(80px, 15vw, 200px);
   height: auto;
   cursor: pointer;
@@ -178,7 +212,6 @@ body {
           drop-shadow(0 0 15px rgba(137, 174, 255, 0.5));
 }
 
-
 .main_colored_background {
   position: absolute;
   top: 0;
@@ -193,9 +226,6 @@ body {
   background-repeat: no-repeat;
   z-index: -1;
 }
-
-
-
 
  .news_colored_background {
   position: absolute;
@@ -230,8 +260,6 @@ body {
   z-index: -1;
 }
 
-
-
 .projects_colored_background {
   position: absolute;
   top: 0;
@@ -247,8 +275,6 @@ body {
   z-index: -1;
 }
 
-
-
 .portfolio_colored_background {
   position: absolute;
   top: 0;
@@ -263,7 +289,6 @@ body {
   background-repeat: no-repeat;
   z-index: -1;
 }
-
 
 @media (max-width: 720px) {
 .row_flex_container {
@@ -293,4 +318,21 @@ body {
   height: auto;
   border-radius: 12px;
   flex-shrink: 0;
+}
+
+.portfolio_image {
+  width: 45%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.scroll_area_centered {
+  display: inline-block;
+
+  align-items: center;
+  justify-content: center; 
+  overflow-y: auto;
+  max-height: clamp(40vh, 60vh, 80vh);
+  width: 100%;
+  padding: 0.5rem;
 }

@@ -1,0 +1,43 @@
+ <!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="../news/news.css"/>
+    <link rel="stylesheet" href="../main/main.css"/>
+
+<script>
+  const ts = new Date().getTime();
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+      link.href += "?v=" + ts;
+    });
+
+    document.querySelectorAll('script[src]').forEach(script => {
+      script.src += "?v=" + ts;
+    });
+  });
+</script>
+
+
+</head>
+
+
+<body>
+<h1 align="center">Portfolio!</h1>
+<div class="portfolio_colored_background"></div>
+  <div class="main_container">
+    <div class="scroll_area_centered">
+        <img src="../assets/screenshots/pngtube_remix_preview.png" alt="me" class="portfolio_image"/>
+        <img src="../assets/screenshots/unique_aquarium_preview.png" alt="me" class="portfolio_image"/>
+        <img src="../assets/art/drawing1.png" alt="me" class="portfolio_image"/>
+        <img src="../assets/art/drawing2.png" alt="me" class="portfolio_image"/>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</body>
+
+</html>
