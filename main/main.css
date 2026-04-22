@@ -7,21 +7,29 @@
 
 .scene {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+
+  width: 1920px;
+  height: 1080px;
+
+  transform-origin: top left;
   overflow: hidden;
 }
 
 .layer {
   position: absolute;
   inset: 0;
+
+  background-position: center bottom;
+  background-repeat: no-repeat;
 }
 
 .stars_gradient {
   background-image:  
                     url("../assets/main_page_assets/stars.png"),
                     linear-gradient(rgb(99, 67, 212), rgb(27, 172, 240), #ffffff, rgb(67, 140, 33));
-  background-size : auto;
-  background-position: 100% bottom;
+  background-size: auto;
 
 }
 
@@ -30,36 +38,22 @@
                     url("../assets/main_page_assets/main_page_placeholder2.svg"), 
                     url("../assets/main_page_assets/main_page_placeholder_back.svg"), 
                     url("../assets/main_page_assets/main_page_placeholder_far_back.svg");
-  background-repeat: no-repeat;
-  background-size : 100%;
-  background-position: 100% bottom;
 }
 
 .character {
-  position: absolute;
-  background-image: linear-gradient(rgb(212, 67, 67), rgb(240, 27, 27));
-  background-repeat: no-repeat;
-  background-size: 15% 15%;
-  right: 15%;
-  bottom: 15%;
-
-  background-position: right bottom;
+  background-image: url("../assets/main_page_assets/placeholders/pickles.png");
+  background-size : 250px;
+  right: -1400px;
+  bottom: 160px;
 }
 
 .middle {
   background-image: url("../assets/main_page_assets/main_page_placeholder.svg");
-  background-repeat: no-repeat;
-  background-size: 100%;
-  background-position: 100% bottom;
 }
 
 .front {
   background-image: url("../assets/main_page_assets/main_page_placeholder_front.svg");
-  background-repeat: no-repeat;
-  background-size: 100%;
-  background-position: 100% bottom;
 }
-
 
 .flex_container {
   display: flex;

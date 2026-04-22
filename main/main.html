@@ -18,8 +18,8 @@
     </script>
 </head>
 <body>
+    <div class="layer stars_gradient"></div>
     <div class="scene">
-        <div class="layer stars_gradient"></div>
         <div class="layer bg"></div>
         <!--
         <div class="layer character"></div>-->
@@ -67,6 +67,24 @@
     <script src="../games/games/TestExport/CatCross.js?v=<?= new Date().getTime() ?>"></script>
 
 <script>
+
+const baseW = 1920;
+const baseH = 1080;
+
+function updateScale() {
+  const scene = document.querySelector('.scene');
+  const scale = window.innerWidth / baseW;
+  const scaledHeight = baseH * scale;
+  const offsetY = window.innerHeight - scaledHeight;
+  scene.style.transform = `
+    translate(0px, ${offsetY}px)
+    scale(${scale})
+  `;
+}
+
+window.addEventListener('resize', updateScale);
+updateScale();
+
 const originalSubviewHTML = document.getElementById("subview").innerHTML;
 const timestamp = new Date().getTime();
 
