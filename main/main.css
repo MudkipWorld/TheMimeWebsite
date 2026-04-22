@@ -35,6 +35,17 @@
   background-position: 100% bottom;
 }
 
+.character {
+  position: absolute;
+  background-image: linear-gradient(rgb(212, 67, 67), rgb(240, 27, 27));
+  background-repeat: no-repeat;
+  background-size: 15% 15%;
+  right: 15%;
+  bottom: 15%;
+
+  background-position: right bottom;
+}
+
 .middle {
   background-image: url("../assets/main_page_assets/main_page_placeholder.svg");
   background-repeat: no-repeat;
@@ -48,6 +59,7 @@
   background-size: 100%;
   background-position: 100% bottom;
 }
+
 
 .flex_container {
   display: flex;
