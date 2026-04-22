@@ -35,16 +35,6 @@
   background-position: 100% bottom;
 }
 
-.char {
-  position: absolute;
-  inset: 0;
-
-  background: url("../assets/main_page_assets/placeholders/pickles.png");
-  background-repeat: no-repeat;
-  background-size: 14.5%;
-  background-position: 100% bottom;
-}
-
 .middle {
   background-image: url("../assets/main_page_assets/main_page_placeholder.svg");
   background-repeat: no-repeat;
@@ -59,14 +49,14 @@
   background-position: 100% bottom;
 }
 
-.flex-container {
+.flex_container {
   display: flex;
   flex-direction: column;
   width: 90%;
   margin: auto;
 }
 
-.bodybg {
+.body_bg {
   position: relative;
   background-color: rgba(160, 255, 223, 0.35);
   border-radius: 20px;
