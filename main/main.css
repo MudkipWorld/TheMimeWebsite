@@ -46,6 +46,13 @@
   bottom: 145px;
 }
 
+.character_static {
+  background-image: url("../assets/main_page_assets/placeholders/pickles.png");
+  background-size: 250px;
+  right: -1440px;
+  bottom: 165px;
+}
+
 #glcanvas {
   bottom: 0;
   right: 0;

@@ -21,9 +21,8 @@
     <div class="layer stars_gradient"></div>
     <div class="scene">
         <div class="layer bg"></div>
-        <div class="layer character">
-            <canvas id="glcanvas" width="310" height="310" onclick="squishPickles()">
-            </canvas>
+        <div class="layer character_static">
+            <!--<canvas id="glcanvas" width="310" height="310" onclick="squishPickles()"></canvas>-->
         </div>
         <div class="layer middle"></div>
         <div class="layer front"></div>
@@ -72,6 +71,7 @@
     <script src="../thirdparty/skelform-js.js"></script>
     <script src="../thirdparty/api.js"></script>
     <script>
+        /*
         async function start() {
             let skellington = await SkfDownloadSample("models/pickles.skf");
             await SkfInit(skellington, glcanvas);
@@ -85,7 +85,7 @@
             console.log(skfCanvases[0].armature)
             requestAnimationFrame(SkfNewFrame);
         }
-        start();
+        //start();
 
         async function squishPickles() {
             const c = skfCanvases[0];
@@ -94,7 +94,7 @@
             c.selectedAnim = 1;
             c.playing = true;
 
-            await delay(550);
+            await delay(1000);
             c.animTime = 0;
             c.selectedAnim = 0;
             c.playing = true;
@@ -102,7 +102,7 @@
 
        function delay(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
-        }
+        }*/
  
     </script>
 
