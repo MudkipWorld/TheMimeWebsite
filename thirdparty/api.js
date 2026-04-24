@@ -13,10 +13,12 @@ let skfCanvasTemplate = {
   elPlay: {},
   elProgress: {},
   armature: {},
+  cachedBones: [],
   activeStyles: [],
   stylesOpen: [],
   gl: {},
   program: {},
+  buffers: {},
   styleDrop: false
 };
 
@@ -36,6 +38,8 @@ async function SkfInit(skfData, canvas) {
   glprogram = SkfInitGl(skfCanvases[last].gl, skfCanvases[last].program);
   skfCanvases[last].gl = glprogram[0];
   skfCanvases[last].program = glprogram[1];
+  skfCanvases[last].buffers = glprogram[2];
+  SkfInitNextKf(skfCanvases[last].armature.animations);
   canvas.addEventListener('webglcontextlost', function(event) {
     event.preventDefault();
   }, false);
@@ -80,7 +84,25 @@ function SkfInitGl(gl, program) {
   }
   gl.useProgram(program);
 
-  return [gl, program];
+  let buffers = [];
+  buffers.push(gl.createBuffer());
+  buffers.push(gl.createBuffer());
+  buffers.push(gl.createBuffer());
+
+  let attrib_pos = gl.getAttribLocation(program, "a_position");
+  let attrib_uv = gl.getAttribLocation(program, "a_uv");
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers[0]);
+  gl.enableVertexAttribArray(attrib_pos);
+  gl.vertexAttribPointer(attrib_pos, 2, gl.FLOAT, false, 0, 0);
+  gl.bufferData(gl.ARRAY_BUFFER, 5000, gl.DYNAMIC_DRAW);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers[1]);
+  gl.enableVertexAttribArray(attrib_uv);
+  gl.vertexAttribPointer(attrib_uv, 2, gl.FLOAT, false, 0, 0);
+  gl.bufferData(gl.ARRAY_BUFFER, 5000, gl.DYNAMIC_DRAW);
+
+  return [gl, program, buffers];
 }
 
 function SkfClearScreen(canvas, clearColor, gl, program) {
@@ -91,7 +113,7 @@ function SkfClearScreen(canvas, clearColor, gl, program) {
   gl.viewport(0, 0, canvas.width, canvas.height);
 }
 
-function skfDrawMesh(verts, indices, atlasTex, gl, program) {
+function skfDrawMesh(verts, indices, atlasTex, gl, program, buffers) {
   /* convert pos and uv into arrays */
   pos = new Float32Array(verts.length * 2);
   uv = new Float32Array(verts.length * 2);
@@ -102,20 +124,14 @@ function skfDrawMesh(verts, indices, atlasTex, gl, program) {
     uv[idx * 2 + 1] = vert.uv.y;
   });
 
-  function bindAttribute(name, data, size) {
-    const buffer = gl.createBuffer();
+  function bindAttribute(name, data, size, buffer) {
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-
-    const loc = gl.getAttribLocation(program, name);
-    gl.enableVertexAttribArray(loc);
-    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
   }
-  bindAttribute("a_position", pos, 2);
-  bindAttribute("a_uv", uv, 2);
+  bindAttribute("a_position", pos, 2, buffers[0]);
+  bindAttribute("a_uv", uv, 2, buffers[1]);
 
-  const indexBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers[2]);
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
   gl.activeTexture(gl.TEXTURE0);
@@ -162,7 +178,7 @@ async function skfReadFile(fileBytes, gl) {
   return armature;
 }
 
-function SkfDraw(bones, styles, atlases, gl, program) {
+function SkfDraw(bones, styles, atlases, gl, program, buffers) {
   bones.forEach((bone, b) => {
     let tex = SkfGenericGetBoneTexture(bone.tex, styles);
     if (!tex) {
@@ -177,13 +193,21 @@ function SkfDraw(bones, styles, atlases, gl, program) {
     const tbot = (tex.offset.y + tex.size.y) / size.y;
     const tsize = tex.size;
 
-    let verts;
+    let verts = [];
     let indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
     if (bone.vertices) {
-      verts = structuredClone(bone.vertices);
-      for (vert of verts) {
+      for (vert of bone.vertices) {
+        verts.push({});
+        verts[verts.length - 1].uv = {
+          x: vert.uv.x,
+          y: vert.uv.y
+        }
+        verts[verts.length - 1].pos = {
+          x: vert.pos.x,
+          y: vert.pos.y
+        }
         const uvsize = { x: tright - tleft, y: tbot - ttop };
-        vert.uv = { x: tleft + (uvsize.x * vert.uv.x), y: ttop + (uvsize.y * vert.uv.y) };
+        verts[verts.length - 1].uv = { x: tleft + (uvsize.x * vert.uv.x), y: ttop + (uvsize.y * vert.uv.y) };
       }
       indices = new Uint16Array(bone.indices);
     } else {
@@ -211,7 +235,7 @@ function SkfDraw(bones, styles, atlases, gl, program) {
       }
     }
 
-    skfDrawMesh(verts, indices, atlases[tex.atlas_idx].texture, gl, program);
+    skfDrawMesh(verts, indices, atlases[tex.atlas_idx].texture, gl, program, buffers);
   })
 }
 
@@ -234,6 +258,224 @@ function skfDrawPoints(poses) {
   })
 }
 
+function SkfShowPlayer(id, skfCanvas, showSkfBranding) {
+  const style = document.createElement("style");
+  document.head.appendChild(style)
+  style.textContent = `
+    .skf-display {
+      display: flex;
+      flex-direction: column;
+    }
+    .skf-canvas-container {
+      position: relative;
+    }
+    .skf-toolbar {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      background: #352253;
+      padding-left: 1rem;
+      padding-right: 1rem;
+      height: 3rem;
+      margin-top: -6px;
+    }
+    .skf-toolbar-container {
+      display: flex;
+    }
+    .skf-title {
+      color: #fff;
+      display: flex;
+      align-items: center;
+      margin-right: 0.5rem;
+    }
+    
+    .skf-logo {
+      width: 3rem;
+      margin-right: 0.5rem;
+    }
+    
+    .skf-title-text {
+      font-size: 1.2rem;
+      font-family: arial;
+      margin: 0;
+      text-decoration: none;
+    }
+
+    .skf-play-container {
+      width: 3.5rem;
+    }
+    
+    .skf-play {
+      background: #412e69;
+      border: 2px solid rgb(89, 70, 136);
+      padding: 0.25rem;
+      color: white;
+      cursor: pointer;
+      height: 2rem;
+    }
+    
+    .skf-select {
+      background: #412e69;
+      border: 2px solid rgb(89, 70, 136);
+      padding: 0.25rem;
+      color: white;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      height: 2rem;
+    }
+    
+    .skf-range {
+      -webkit-appearance: none;
+      appearance: none;
+      bottom: 0.75rem;
+      left: 0;
+      width: -moz-available;
+      width: -webkit-fill-available;
+      margin-left: 1rem;
+      margin-right: 1rem;
+      height: 0.35rem;
+      background: #412e69;
+    }
+    
+    .skf-range[type="range"]::-webkit-slider-thumb,
+    .skf-range::-moz-range-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgb(89, 70, 136);
+      cursor: pointer;
+    }
+    
+    .skf-range[type="range"]::-webkit-slider-runnable-track,
+    .skf-range::-moz-range-progress {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 0.35rem;
+      background-color: rgb(89, 70, 136);
+    }
+
+    .skf-menu {
+      position: absolute;
+      background: #412e69;
+      border: 2px solid rgb(89, 70, 136);
+      padding: 0.25rem;
+      color: white;
+      cursor: pointer;
+      visibility: hidden;
+      font-family: arial;
+
+      p {
+        margin: 0;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;   
+        -ms-user-select: none;    
+        -khtml-user-select: none; 
+        padding: 0.25rem;
+        margin: 0.2rem 0rem;
+
+        &.selected {
+          background: rgb(101 80 157);
+        }
+      }
+    }
+  `;
+
+  function newEl(str, parent, className) {
+    let el = document.createElement(str);
+    el.className = className, parent.appendChild(el);
+    return el;
+  }
+
+  let main = document.getElementById(id);
+  main.appendChild(skfCanvas.elCanvas);
+
+  let toolbar = newEl("div", main, "skf-toolbar");
+  let toolbarContainer = newEl("div", toolbar, "");
+
+  /* animation progress bar */
+  let slider = newEl("input", toolbar, "skf-range");
+  slider.type = "range";
+  slider.min = 0;
+  slider.max = 1;
+  slider.step = 0.001;
+  skfCanvas.elProgress = slider;
+  slider.addEventListener("input", () => {
+    skfCanvas.playing = false;
+    skfCanvas.elPlay.innerHTML = "Play";
+    anim = skfCanvas.armature.animations[skfCanvas.selectedAnim];
+    frames = anim.keyframes[anim.keyframes.length - 1].frame;
+    frametime = 1 / anim.fps;
+    skfCanvas.animTime = frames * slider.value * frametime * 1000;
+  });
+
+  let toolbarFlex = newEl("div", toolbarContainer, "skf-toolbar-container");
+
+  /* play button */
+  let playContainer = newEl("div", toolbarFlex, "skf-play-container");
+  playContainer.className = "skf-play-container";
+  let playButton = newEl("button", playContainer, "skf-play");
+  skfCanvas.elPlay = playButton;
+  playButton.innerText = "Play";
+  playButton.addEventListener("click", () => {
+    skfCanvas.playing = !skfCanvas.playing;
+  });
+
+  // animation select
+  let animSelect = newEl("select", toolbarFlex, "skf-select");
+  skfCanvas.armature.animations.forEach((anim, a) => {
+    animSelect.add(new Option(anim.name, a));
+  });
+  animSelect.addEventListener("click", () => {
+    skfCanvas.selectedAnim = animSelect.value;
+    skfCanvas.animTime = 0;
+    skfCanvas.elProgress.value = 0.0;
+  });
+
+  // style select
+  let styleMenuContainer = newEl("div", toolbarFlex, "");
+  let styleMenu = newEl("div", styleMenuContainer, "skf-menu");
+  let styleButton = newEl("button", styleMenuContainer, "skf-play");
+  styleButton.innerText = "Styles";
+  styleButton.addEventListener("click", () => {
+    styleMenu.style.visibility = (styleMenu.style.visibility == "visible") ? "hidden" : "visible";
+  });
+  // style buttons
+  skfCanvas.armature.styles.forEach((style, s) => {
+    let styleEl = newEl("p", styleMenu, "");
+    styleEl.innerText = style.name;
+    let isActive = skfCanvas.activeStyles.find((style2) => style2.id == style.id);
+    if (isActive) {
+      styleEl.classList.add("selected");
+    }
+    styleEl.addEventListener("click", () => {
+      let isActive = skfCanvas.activeStyles.find((style2) => style2.id == style.id);
+      if (!isActive) {
+        skfCanvas.activeStyles.splice(skfCanvas.armature.styles[s].id, 0, skfCanvas.armature.styles[s]);
+        styleEl.classList.add("selected");
+      } else {
+        skfCanvas.activeStyles = skfCanvas.activeStyles.filter((style2) => style2.id != style.id);
+        styleEl.classList.remove("selected");
+      }
+      skfCanvas.activeStyles.sort(function(a, b) { return (a.id < b.id) ? -1 : 1 });
+    })
+  });
+  // push style menu below button
+  //styleMenu.style.transform = "translateY(-" + (styleMenu.offsetHeight - 2) + "px)";
+  styleMenu.style.transform = "translateY(30px)";
+
+  // title & logo
+  let title = newEl("a", toolbar, "");
+  title.href = "https://skelform.org";
+  title.target = "_blank";
+  title.style.display = (showSkfBranding) ? 'block' : 'none';
+  let titleContainer = newEl("div", title, "skf-title");
+  let titleImg = newEl("img", titleContainer, "skf-logo");
+  titleImg.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADwAAAA8CAYAAAA6/NlyAAAAAXNSR0IArs4c6QAAAJZlWElmTU0AKgAAAAgABQESAAMAAAABAAEAAAEaAAUAAAABAAAASgEbAAUAAAABAAAAUgExAAIAAAARAAAAWodpAAQAAAABAAAAbAAAAAAAAAAiAAAAAQAAACIAAAABd3d3Lmlua3NjYXBlLm9yZwAAAAOgAQADAAAAAQABAACgAgAEAAAAAQAAADygAwAEAAAAAQAAADwAAAAABFwuWQAAAAlwSFlzAAAFOwAABTsB7JnjvgAAAi1pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDYuMC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+d3d3Lmlua3NjYXBlLm9yZzwveG1wOkNyZWF0b3JUb29sPgogICAgICAgICA8dGlmZjpZUmVzb2x1dGlvbj4zNDwvdGlmZjpZUmVzb2x1dGlvbj4KICAgICAgICAgPHRpZmY6T3JpZW50YXRpb24+MTwvdGlmZjpPcmllbnRhdGlvbj4KICAgICAgICAgPHRpZmY6WFJlc29sdXRpb24+MzQ8L3RpZmY6WFJlc29sdXRpb24+CiAgICAgIDwvcmRmOkRlc2NyaXB0aW9uPgogICA8L3JkZjpSREY+CjwveDp4bXBtZXRhPgrwK2grAAAKx0lEQVRoBe1YfYxdVRE/576Pfd0P6HZ1pXVB6UpEIKkNpUSitpTSBYvoKrskkpgY6haUQqxJozWxrwFKorEoJUK3iYKmiPuoYMS2awpFoo2mFREjCZVurbQL7HZ3Lfv1vu69/n7nnbn7vvYDbaN/3MnOztxzZubMzJkz596nVAhhBsIMhBkIMxBmIMxAmIEwA2EGwgyEGQgzUJkBXTlUGPF9n3Pl8z5ntdaGFiT/d/+tj8alMi/8OftII0WGyuwUHjHvzCZTVfEsDVofndnMVfOxZAcpIJkBfwEMXg9cBBwDvgZ8CfPDoAYgEwHjiY4dPqeEa2I9VxbB8zzwS4FXABcA6d8LkDkKqjDvgPfIlwAmgp0FfwtwHFgOAxh4FLhElMFzt2fNtsj/pxRr0D8m2AD4i4D3AvuA1WBTkWylf9CIUgD0UmDGWjgDmraYs2NCHgHTbHVKnJGFzhbFOkyqCRY0DtwMHAMK5MGIn6MyCLrW+hcELEFi13XeOtgGGgeyjM+zY0IokwXWAu8A3gyjt0N3P3gXfLTIDoamIJlEFfwthfUuV/19k2h6f1KLFjfqobF6/Yn6sXxnqjMo0ymtQknimf7RPsv2x8BlVmYCNAZkHDV2jPQdIH3/LPDX0PWgO1XafMCEAfBJIGGyQKr+Z0aLM3x3kX6QRGtRb7hxrzgjYhWUMiYphRnTW7AGd5YBsfLWAuWYTYDPAqcDzhOekoXAmwoxztGeTIAOWr6koRXNk6VyHXASyKbxAxhsQCbvB8+FTGPp6fAjB/q6nR371mcwrpJrepsz2v8wFmtWnu8gy8MZ13v9e8+vPbFj36cy/j5fL+w6ElvfvSxHeUAMNnm8bgGfMiNKcVdZYTOBxCOxUNaMmYBhNHASEy9bS9wVllnQKOx4MWGwLHEegftgZAS2fgga39l1xOns1nTc3bym9wq0nDvSvrtG+84Ho040piNa5b2sH486J7/Ztu93WuldulcfVN0KOjtjvt/FpPFcroKNHiAhDZxLsLKRh6kEG9w8E3Cwixg05w+UgT4PvAY4l2xCLAia/Ao4+iLtgGa+0bb/Lu1722rj8xs8L69yXhabi1aA5R0dUdFIXEWcuJrI/ouvOdsf6L3x63QQAOIvhL2XgLwiGWwCOBuwmhjDAHA57JyAnaC3BGcXk2wKPNhU6AYSuHOVd5iZKvlHOVO2vq/YvZtoZ+utvfclnLod8Whtw0T2TCadH0+7Xi6HDuJ6yndd381l8pNpBJuOODFVF1uw8duf6X2SwdK667q7QBgsK2XWPgAZgjS/xxhsYWgqhiBgu4g8/xSCzwFZGjyncwFT+lqryyB8lVIPrqyNzf9Wzk2rbH6SlQKHNXcohrJCQfOomIbEsYTr5dNj6SF3wfyFt35S7b4HSWt1HIcvPgQmIKhGM1L6zyQIQ1KRDPT7FIEd9oFg0yRAzrH3s/vGrcDXMDQKZHNiOc0GsugfXvl9//ENra3b/bxWCGQc9uy5E5FiU4UxJCqBkLLvnBlRH7u28f67W56th97PrCT9rKYshpgMuS45thG6bzJY8HLdclyVBGxGUD42K3/F8+12jLtAg9MBM2iuD9DdSz6euqhlefPSkeEhXzsqAXvT6QXjlIGT8yZGxyfff3FL3Y5Tp1di8gkrwEqTUrVDJYRBSaNKws4vYI9JqHjtrQgYwvSO55ldklfBnUACz2lJtsxo4Z+UDJPy8mrVvCqRqFW+Z46DKfUi2WlZrMfC9XPZnOpSjTec7h9laR63CtNljYlgsIzlIdjYauXN1Wj5gFQEzBkoMQDEbLrbo+BvA4rhapkWZwbHxrIjLWreJW6euZFhsHMArAcp7WQyGVV3ZbT1uT1HaaTfqnLHyoF+SkLvhd/3UMBuVtXNqRowlWzQYowdUnhOTwd5OOtG0JyM76ZKq/k5nTpkcSEz8Ehc1wwdH6XyTEep2JDp4tBlTNNmWuq+WNHwUEwgaF7812HgR1aA14OcVTtUQs5ramqoHVP5U9rxkDTFtyTcgVPXQkGax8b65AuDGQcZcvWEdtya3KD/xtU3tVKIn3yEakEwOO4k49iEtd6Azw+D8gMjB75Cp2rAVLDBng9DDwEJM138UimNkPvAz9XICx91G7uijh7GGxU/QgjB4nQkeLDjcI1tBu8ouFpimcYTr48euHLVhVx/sdGu/o9mGIO8bGyD7y/C/iug3HHzblCsWhEwBCVrlNsE5L3KLJqSAa0G1OHZZtnfvE41fSczlDucqI805DP+IByIMx7GxphM6Nh2/CG+AtAAHlxdox2dVceeUaO/wRDv4YaCRNUjJedFgqNsEvg5rGmrK/gKNGa4TjmYixqBX4KJdXaSwYhxkZdNIuWcNIm1u/z20RP7R7sTdZE83jAGHMd/G7s9GHUcoBqMRtRgzNEDUQ3eYgTPwFOJOq0m+rJ7en9y9V9gs90uxnNc7CvXLEfxrx2+t1m9Yh0zVDIAQSpJk+BizUB+WzJgvnHxTUaQz+P2mWVrysfzvF8huyevuvOCPfiA640jIgT7VtTxgWoAgTLYwUiEiAREEHiE86o/FsV1mFV/XvzpxsfbvrhkPJ/3fgm7AlyPa5DyeBX7Qz/ot3wdfR48Gy8/IUuarWSF82zn8gHBF40e4BogrwU+y46CLeH5zMXYXF4D3oCFRkDVtqV73xtvjX8JH7WtKOgMajkLL+zLwFQx40THMF7j+d7p7KSze/Pe1UepT4BPz4DcBHwLyIYpOwu2hOczEzIfeBzYDj/+CX1WLJutgekCZjk/AWwC8vUyDpSAhWLIAI3x1ZElvQ7GD2ERdPgUxjvd7R2H5kXUxArMXYbF6vGZ6KBnBz+joqZgz5/0PNUXc/Vv73p69RBkeTXxa4u3RAuenwZeCBwG0hdmS/wgFZ6VyKqlzJehfxD6JS8g5U1LFLlb5FkiDIhlIXNgA+DOyu5vscGaDk+J5MqD0Y2pa1h6+x9uP3DYizstOM9NOqoTjufqvKczsagzggvk1FefupY7qHo6eiIdPR2sAgbLq/Ek6HpM7QSyKdEn2QDxiVSQiaf/7wES+PMOzBSuqPIdNtmAwHIIbgNSWbIG1hilDo0z2Hognx+EwWehZxIDXurVBFD+exVK26xrOjaUBfgLSWdq6idYjsMmE8izuAyPDwAbgaeBLG/xpThw+kyZ70JvDyhtgC0EXL7DnCcwi28CuXtsEMVnhwkg0OhJ4CMw9kcaBU/LQbB4VgyWAaY6Uk5HCjuHai0LVGNXnVcvf9XvTJYGS30AP2bYW46AfgXPm4CXAln6Un0mgXimb0T6YCoGOlM/3mFQBMGaTASTENyAoRXAfqB0OlImgXr8JeJJOPI2ZPkMtjRYjFUAg9+a3GrW3ZLcwuApIztUIW8mC/bpGz9qWFVfAK4GciPYoRm4VN37wP8dyHdr/mRbcobNapgMAAImaFCeg9uAbGCyazyP/wAegjF+PppyIcXzjE5T5r8B+FOSVDx/CPauA34EyCQQKMMNegz+HJNYOCFQETAnaJwBkOLxYiBf8VjaAxhnKRmgQTAUPqfB2uWCNbGebAB95TW0CMig+T5wDPN8ywJ5F37ZYKFfCZybab5S4+yOzLb+TL5V3eFi98qV31XWig2dI77cPy7z/+bjOQo9NBtmIMxAmIEwA2EGwgyEGQgzEGYgzECYgbOYgX8DWqi2pZD8PN4AAAAASUVORK5CYII=";
+  let titleText = newEl("p", titleContainer, "skf-title-text");
+  titleText.innerText = "SkelForm";
+}
+
 /* process all skf canvases per frame */
 let skfLastTime = 0;
 function SkfNewFrame(time) {
@@ -245,8 +487,9 @@ function SkfNewFrame(time) {
     const frame = SkfGenericTimeFrame(skfc.animTime, anim, false, true);
     const smooth = (skfc.playing) ? skfc.smoothFrames : 0;
     SkfGenericAnimate(skfc.armature.bones, [anim], [frame], [smooth]);
-    bones = SkfGenericConstruct(skfc.armature.bones, skfc.armature.ik_root_ids, skfc.constructOptions);
+    skfc.armature.cachedBones = SkfGenericConstruct(skfc.armature.bones, skfc.armature.ik_root_ids, skfc.armature.cachedBones);
     let options = skfc.constructOptions;
+    bones = skfc.armature.cachedBones;
     bones.forEach((bone, b) => {
       bones[b].scale = mulv2(bones[b].scale, options.scale)
       bones[b].pos = mulv2(bones[b].pos, options.scale)
@@ -260,7 +503,7 @@ function SkfNewFrame(time) {
         }
       }
     })
-    SkfDraw(bones, skfc.activeStyles, skfc.armature.atlases, skfc.gl, skfc.program);
+    SkfDraw(bones, skfc.activeStyles, skfc.armature.atlases, skfc.gl, skfc.program, skfc.buffers);
     if (skfc.elProgress) {
       anim = skfc.armature.animations[skfc.selectedAnim];
       const frame = SkfGenericTimeFrame(skfc.animTime, anim, false, true);
