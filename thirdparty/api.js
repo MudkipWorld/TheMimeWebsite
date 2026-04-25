@@ -10,16 +10,21 @@ let skfCanvasTemplate = {
     scale: { x: 1, y: 1 }
   },
   elCanvas: {},
+  lastCanvasSize: { x: 0, y: 0 },
   elPlay: {},
   elProgress: {},
   armature: {},
   cachedBones: [],
   activeStyles: [],
   stylesOpen: [],
+  rendered: false, // used to render at least one frame if an anim isn't playing
+  lastAnimFrame: -1, // if anim frame is same as this, skip re-rendering
+
+  // WebGL stuff
   gl: {},
   program: {},
   buffers: {},
-  styleDrop: false
+  uniforms: {},
 };
 
 async function SkfDownloadSample(filename) {
@@ -35,17 +40,21 @@ async function SkfInit(skfData, canvas) {
   skfCanvases[last].program = {};
   skfCanvases[last].armature = await skfReadFile(skfData, skfCanvases[last].gl);
   skfCanvases[last].elCanvas = canvas;
-  glprogram = SkfInitGl(skfCanvases[last].gl, skfCanvases[last].program);
+  glprogram = SkfInitGl(skfCanvases[last].gl, skfCanvases[last].program, [0, 0, 0, 0], canvas);
   skfCanvases[last].gl = glprogram[0];
   skfCanvases[last].program = glprogram[1];
   skfCanvases[last].buffers = glprogram[2];
+  skfCanvases[last].uniforms = glprogram[3];
+  for (bone of skfCanvases[last].armature.bones) {
+    bone.zindex = bone.zindex || 0;
+  }
   SkfInitNextKf(skfCanvases[last].armature.animations);
   canvas.addEventListener('webglcontextlost', function(event) {
     event.preventDefault();
   }, false);
 }
 
-function SkfInitGl(gl, program) {
+function SkfInitGl(gl, program, clearColor, canvas) {
   const vertexSource = `attribute vec2 a_position; attribute vec2 a_uv; uniform vec2 u_resolution; varying vec2 v_uv; void main(){ vec2 zeroToOne=a_position/u_resolution; vec2 zeroToTwo=zeroToOne*2.0; vec2 clipSpace=zeroToTwo-1.0; gl_Position=vec4(clipSpace*vec2(1.0,-1.0),0.0,1.0); v_uv=a_uv; }`;
   const fragmentSource = `precision mediump float; varying vec2 v_uv; uniform sampler2D u_texture; void main(){ gl_FragColor=texture2D(u_texture,v_uv); }`;
 
@@ -84,6 +93,10 @@ function SkfInitGl(gl, program) {
   }
   gl.useProgram(program);
 
+  // create buffers for later.
+  // 0 - pos buffer
+  // 1 - uv buffer
+  // 2 - tex buffer
   let buffers = [];
   buffers.push(gl.createBuffer());
   buffers.push(gl.createBuffer());
@@ -92,59 +105,70 @@ function SkfInitGl(gl, program) {
   let attrib_pos = gl.getAttribLocation(program, "a_position");
   let attrib_uv = gl.getAttribLocation(program, "a_uv");
 
+  // initialize pos buffer
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers[0]);
   gl.enableVertexAttribArray(attrib_pos);
   gl.vertexAttribPointer(attrib_pos, 2, gl.FLOAT, false, 0, 0);
   gl.bufferData(gl.ARRAY_BUFFER, 5000, gl.DYNAMIC_DRAW);
 
+  // initialize uv buffer
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers[1]);
   gl.enableVertexAttribArray(attrib_uv);
   gl.vertexAttribPointer(attrib_uv, 2, gl.FLOAT, false, 0, 0);
   gl.bufferData(gl.ARRAY_BUFFER, 5000, gl.DYNAMIC_DRAW);
 
-  return [gl, program, buffers];
-}
+  // initialize indices buffer
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers[2]);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, 5000, gl.DYNAMIC_DRAW);
 
-function SkfClearScreen(canvas, clearColor, gl, program) {
   gl.clearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  const resLoc = gl.getUniformLocation(program, "u_resolution");
-  gl.uniform2f(resLoc, canvas.width, canvas.height);
-  gl.viewport(0, 0, canvas.width, canvas.height);
+
+  // initialize uniforms to use later
+  const uniforms = {
+    resolution: gl.getUniformLocation(program, "u_resolution"),
+    texture: gl.getUniformLocation(program, "u_texture")
+  };
+  gl.uniform1i(uniforms.texture, 0);
+
+  return [gl, program, buffers, uniforms];
 }
 
-function skfDrawMesh(verts, indices, atlasTex, gl, program, buffers) {
+// clear current frame of GL viewport, to make way for the next
+function SkfClearScreen(canvas, lastCanvasSize, gl, program, uniforms) {
+  gl.clear(gl.COLOR_BUFFER_BIT);
+
+  // update GL resolution with canvas if it changed
+  if (lastCanvasSize.x != canvas.width || lastCanvasSize.y != canvas.height) {
+    lastCanvasSize.x = canvas.width;
+    lastCanvasSize.y = canvas.height;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
+  }
+}
+
+function skfDrawMesh(verts, indices, atlasTex, gl, program, buffers, uniforms) {
   /* convert pos and uv into arrays */
   pos = new Float32Array(verts.length * 2);
   uv = new Float32Array(verts.length * 2);
-  verts.forEach((vert, idx) => {
-    pos[idx * 2] = vert.pos.x;
-    pos[idx * 2 + 1] = vert.pos.y;
-    uv[idx * 2] = vert.uv.x;
-    uv[idx * 2 + 1] = vert.uv.y;
-  });
-
-  function bindAttribute(name, data, size, buffer) {
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, data);
+  for (let i = 0; i < verts.length; i++) {
+    pos[i * 2] = verts[i].pos.x;
+    pos[i * 2 + 1] = verts[i].pos.y;
+    uv[i * 2] = verts[i].uv.x;
+    uv[i * 2 + 1] = verts[i].uv.y;
   }
-  bindAttribute("a_position", pos, 2, buffers[0]);
-  bindAttribute("a_uv", uv, 2, buffers[1]);
 
+  // buffer pos
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers[0]);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, pos);
+  // buffer UV 
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffers[1]);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, uv);
+  // buffer indices
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers[2]);
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+  gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, new Uint16Array(indices));
 
   gl.activeTexture(gl.TEXTURE0);
-
-  if (!atlasTex) {
-    gl.bindTexture(gl.TEXTURE_2D, skfPlaceholderPixel);
-  } else {
-    gl.bindTexture(gl.TEXTURE_2D, atlasTex);
-  }
-
-  const u_textureLoc = gl.getUniformLocation(program, "u_texture");
-  gl.uniform1i(u_textureLoc, 0);
-
+  gl.bindTexture(gl.TEXTURE_2D, atlasTex);
   gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 }
 
@@ -178,11 +202,37 @@ async function skfReadFile(fileBytes, gl) {
   return armature;
 }
 
-function SkfDraw(bones, styles, atlases, gl, program, buffers) {
-  bones.forEach((bone, b) => {
+function SkfDraw(bones, styles, atlases, gl, program, buffers, uniforms) {
+  let verts = [];
+  let indices = [];
+  let lastAtlasIdx = 0;
+  let hiddens = new Array(bones.length).fill(false);
+  bones.sort((a, b) => (a.zindex > b.zindex) ? 1 : -1);
+  for (let b = 0; b < bones.length; b++) {
+    let bone = bones[b];
+    let hidden = bone.hidden || false;
+    if (bone.parent_id != -1 && hiddens[bone.parent_id]) {
+      hidden = true;
+    }
+    hiddens[b] = hidden;
+    if (hidden) {
+      continue;
+    }
+
     let tex = SkfGenericGetBoneTexture(bone.tex, styles);
     if (!tex) {
-      return
+      continue
+    }
+
+    // if this bone uses a different texture atlas, render everything before it and prepare
+    // to render anything that uses this atlas
+    if (tex.atlas_idx != lastAtlasIdx) {
+      if (verts.length > 0 && indices.length > 0) {
+        skfDrawMesh(verts, indices, atlases[tex.atlas_idx].texture, gl, program, buffers, uniforms);
+        verts = [];
+        indices = [];
+      }
+      lastAtlasIdx = tex.atlas_idx;
     }
 
     const size = atlases[tex.atlas_idx].size;
@@ -193,8 +243,8 @@ function SkfDraw(bones, styles, atlases, gl, program, buffers) {
     const tbot = (tex.offset.y + tex.size.y) / size.y;
     const tsize = tex.size;
 
-    let verts = [];
-    let indices = new Uint16Array([0, 1, 2, 0, 2, 3]);
+    let thisIndices = new Uint16Array([0, 1, 2, 0, 2, 3]);
+    let vertLen = 4;
     if (bone.vertices) {
       for (vert of bone.vertices) {
         verts.push({});
@@ -209,9 +259,10 @@ function SkfDraw(bones, styles, atlases, gl, program, buffers) {
         const uvsize = { x: tright - tleft, y: tbot - ttop };
         verts[verts.length - 1].uv = { x: tleft + (uvsize.x * vert.uv.x), y: ttop + (uvsize.y * vert.uv.y) };
       }
-      indices = new Uint16Array(bone.indices);
+      thisIndices = new Uint16Array(bone.indices);
+      vertLen = bone.vertices.length;
     } else {
-      verts = [{
+      rectVerts = [{
         uv: { x: tleft, y: ttop },
         pos: { x: (-tsize.x / 2 * bone.scale.x), y: (-tsize.y / 2 * bone.scale.y) },
       },
@@ -230,13 +281,25 @@ function SkfDraw(bones, styles, atlases, gl, program, buffers) {
 
       const invPos = { x: bone.pos.x, y: -bone.pos.y };
       for (let i = 0; i < 4; i++) {
-        verts[i].pos = rotate(verts[i].pos, -bone.rot);
-        verts[i].pos = addv2(verts[i].pos, invPos);
+        rectVerts[i].pos = rotate(rectVerts[i].pos, -bone.rot);
+        rectVerts[i].pos = addv2(rectVerts[i].pos, invPos);
       }
+
+      verts.push(rectVerts[0]);
+      verts.push(rectVerts[1]);
+      verts.push(rectVerts[2]);
+      verts.push(rectVerts[3]);
     }
 
-    skfDrawMesh(verts, indices, atlases[tex.atlas_idx].texture, gl, program, buffers);
-  })
+    // batch this bone's indices, with proper offsets
+    for (idx of thisIndices) {
+      indices.push(idx + verts.length - vertLen);
+    }
+  }
+
+  if (verts.length > 0 && indices.length > 0) {
+    skfDrawMesh(verts, indices, atlases[lastAtlasIdx].texture, gl, program, buffers, uniforms);
+  }
 }
 
 function skfDrawPoints(poses) {
@@ -407,6 +470,7 @@ function SkfShowPlayer(id, skfCanvas, showSkfBranding) {
     frames = anim.keyframes[anim.keyframes.length - 1].frame;
     frametime = 1 / anim.fps;
     skfCanvas.animTime = frames * slider.value * frametime * 1000;
+    skfCanvas.rendered = false;
   });
 
   let toolbarFlex = newEl("div", toolbarContainer, "skf-toolbar-container");
@@ -419,6 +483,7 @@ function SkfShowPlayer(id, skfCanvas, showSkfBranding) {
   playButton.innerText = "Play";
   playButton.addEventListener("click", () => {
     skfCanvas.playing = !skfCanvas.playing;
+    playButton.innerText = (playButton.innerText == "Play") ? "Pause" : "Play";
   });
 
   // animation select
@@ -430,6 +495,7 @@ function SkfShowPlayer(id, skfCanvas, showSkfBranding) {
     skfCanvas.selectedAnim = animSelect.value;
     skfCanvas.animTime = 0;
     skfCanvas.elProgress.value = 0.0;
+    skfCanvas.rendered = false;
   });
 
   // style select
@@ -458,6 +524,7 @@ function SkfShowPlayer(id, skfCanvas, showSkfBranding) {
         styleEl.classList.remove("selected");
       }
       skfCanvas.activeStyles.sort(function(a, b) { return (a.id < b.id) ? -1 : 1 });
+      skfCanvas.rendered = false;
     })
   });
   // push style menu below button
@@ -480,17 +547,25 @@ function SkfShowPlayer(id, skfCanvas, showSkfBranding) {
 let skfLastTime = 0;
 function SkfNewFrame(time) {
   for (skfc of skfCanvases) {
-    SkfClearScreen(skfc.elCanvas, [0, 0, 0, 0], skfc.gl, skfc.program);
+    if (!skfc.playing && skfc.rendered) {
+      continue;
+    }
     skfc.animTime += (skfc.playing) ? time - skfLastTime : 0;
-    skfc.elPlay.innerText = (skfc.playing) ? "Pause" : "Play ";
     anim = skfc.armature.animations[skfc.selectedAnim];
     const frame = SkfGenericTimeFrame(skfc.animTime, anim, false, true);
+
+    // skip rendering if this is the same frame
+    if (frame == skfc.lastAnimFrame && skfc.rendered) {
+      continue;
+    }
+    skfc.lastAnimFrame = frame;
+
     const smooth = (skfc.playing) ? skfc.smoothFrames : 0;
     SkfGenericAnimate(skfc.armature.bones, [anim], [frame], [smooth]);
     skfc.armature.cachedBones = SkfGenericConstruct(skfc.armature.bones, skfc.armature.ik_root_ids, skfc.armature.cachedBones);
     let options = skfc.constructOptions;
     bones = skfc.armature.cachedBones;
-    bones.forEach((bone, b) => {
+    for (let b = 0; b < bones.length; b++) {
       bones[b].scale = mulv2(bones[b].scale, options.scale)
       bones[b].pos = mulv2(bones[b].pos, options.scale)
       bones[b].pos = addv2(bones[b].pos, options.position)
@@ -502,13 +577,15 @@ function SkfNewFrame(time) {
           vert.pos = addv2(vert.pos, { x: options.position.x, y: -options.position.y });
         }
       }
-    })
-    SkfDraw(bones, skfc.activeStyles, skfc.armature.atlases, skfc.gl, skfc.program, skfc.buffers);
+    }
+    SkfClearScreen(skfc.elCanvas, skfc.lastCanvasSize, skfc.gl, skfc.program, skfc.uniforms);
+    SkfDraw(bones, skfc.activeStyles, skfc.armature.atlases, skfc.gl, skfc.program, skfc.buffers, skfc.uniforms);
     if (skfc.elProgress) {
       anim = skfc.armature.animations[skfc.selectedAnim];
       const frame = SkfGenericTimeFrame(skfc.animTime, anim, false, true);
       skfc.elProgress.value = frame / anim.keyframes[anim.keyframes.length - 1].frame;
     }
+    skfc.rendered = true;
   }
 
   skfLastTime = time;

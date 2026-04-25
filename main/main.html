@@ -22,9 +22,14 @@
     <div class="scene">
         <div class="layer bg"></div>
         <div class="layer character">
-            <canvas id="glcanvas" width="310" height="310" onclick="squishPickles()"></canvas>
+            <canvas id="glcanvas" width="310" height="310" onclick="squish(0, 1000)"></canvas>
         </div>
+
         <div class="layer middle"></div>
+        <!--
+        <div class="layer character_picnic">
+            <canvas id="glcanvas2" width="310" height="650" onclick="squish(1, 500)"></canvas>
+        </div>-->
         <div class="layer front"></div>
     </div>
     <div class="flex_container">
@@ -72,29 +77,38 @@
     <script src="../thirdparty/api.js"></script>
     <script>
         
-        async function start() {
-            let skellington = await SkfDownloadSample("models/pickles.skf");
-            await SkfInit(skellington, glcanvas);
+        async function start(modelname, modelindex, newglcanvas, scl_x, scl_y, x, y) {
+            let model = await SkfDownloadSample(modelname);
+            await SkfInit(model, newglcanvas);
+            const c = skfCanvases[modelindex];
 
-            skfCanvases[0].activeStyles = [skfCanvases[0].armature.styles[0]];
-            skfCanvases[0].selectedAnim = 0;
-            skfCanvases[0].smoothFrames = 0;
-            skfCanvases[0].playing = true;
-            skfCanvases[0].constructOptions.scale = { x: 0.75, y: 0.75 };
-            skfCanvases[0].constructOptions.position = { x: 175, y: -250 };
-            console.log(skfCanvases[0].armature)
+            c.activeStyles = [c.armature.styles[0]];
+            c.selectedAnim = 0;
+            c.smoothFrames = 0;
+            c.playing = true;
+            c.constructOptions.scale = { x: scl_x, y: scl_y };
+            c.constructOptions.position = { x: x, y: y };
+            //console.log(c.armature)
             requestAnimationFrame(SkfNewFrame);
         }
-        start();
 
-        async function squishPickles() {
-            const c = skfCanvases[0];
+        //async function requestAnimFrame() {
+            //requestAnimationFrame(SkfNewFrame);
+        //}
+
+        start("models/pickles.skf", 0, glcanvas, 0.75, 0.75, 175, -250);
+        //start("models/foveositting.skf", 1, glcanvas2, 0.68, 0.68, 165, -415);
+
+        //requestAnimFrame();
+
+        async function squish(index, delay_ms) {
+            const c = skfCanvases[index];
 
             c.animTime = 0;
             c.selectedAnim = 1;
             c.playing = true;
 
-            await delay(1000);
+            await delay(delay_ms);
             c.animTime = 0;
             c.selectedAnim = 0;
             c.playing = true;

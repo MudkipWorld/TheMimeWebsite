@@ -8,11 +8,11 @@ function SkfGenericFormatFrame(frame, anim, isReverse, isLoop) {
     frame = lastFrame - frame
   }
 
-  return frame
+  return Math.round(frame)
 }
 
-// temporary backport of v0.4.2 field.
-// SkfGenericAnimate() uses this, so this is mandatory
+/* temporary backport of v0.4.2 field.
+   SkfGenericAnimate() uses this, so this is mandatory */
 function SkfInitNextKf(anims) {
   for (anim of anims) {
     anim.keyframes.forEach((kf, k) => {
@@ -78,45 +78,47 @@ function normalize(vec) {
 }
 
 function fabrik(bones, bone_ids, root, target) {
-  let nextPos = target
+  let nextPos = { x: target.x, y: target.y }
   let nextLength = 0
-  let rev_bone_ids = [];
-  for (let i = 0; i < bone_ids.length; i++) {
-    rev_bone_ids.push(bone_ids[i]);
-  }
-  rev_bone_ids.reverse().forEach((id, b) => {
+  let boneIdslength = bone_ids.length;
+  for (let b = 0; b < boneIdslength; b++) {
+    let id = bone_ids[boneIdslength - 1 - b];
+    let id2 = bone_ids[boneIdslength - 1 - (b + 1)];
     const length = mulv2f(normalize(subv2(nextPos, bones[id].pos)), nextLength)
-    if (b != rev_bone_ids.length - 1) {
-      nextLength = magnitude(subv2(bones[id].pos, bones[rev_bone_ids[b + 1]].pos))
+    if (b != boneIdslength - 1) {
+      nextLength = magnitude(subv2(bones[id].pos, bones[id2].pos))
     }
     bones[id].pos = subv2(nextPos, length)
     nextPos.x = bones[id].pos.x
     nextPos.y = bones[id].pos.y
-  })
+  }
 
-  let prevPos = root
+  let prevPos = { x: root.x, y: root.y }
   let prevLength = 0
-  bone_ids.forEach((id, b) => {
+  for (let b = 0; b < boneIdslength; b++) {
+    let id = bone_ids[b];
     const length = mulv2f(normalize(subv2(prevPos, bones[id].pos)), prevLength)
-    if (b != rev_bone_ids.length - 1) {
+    if (b != boneIdslength - 1) {
       prevLength = magnitude(subv2(bones[id].pos, bones[bone_ids[b + 1]].pos))
     }
     bones[id].pos = subv2(prevPos, length)
     prevPos.x = bones[id].pos.x
     prevPos.y = bones[id].pos.y
-  })
+  }
 }
 
 function arcIk(bones, ikRootIds, root, target) {
   let dist = [0.];
   let maxLength = magnitude(subv2(bones[ikRootIds[ikRootIds.length - 1]].pos, root))
   let currLength = 0
-  ikRootIds.forEach((rootId, rid) => {
-    if (rid == 0) { return }
-    length = magnitude(subv2(bones[rootId].pos, bones[ikRootIds[rid - 1]].pos))
+  for (let rid = 0; rid < ikRootIds.length; rid++) {
+    if (rid == 0) {
+      continue
+    }
+    length = magnitude(subv2(bones[ikRootIds[rid]].pos, bones[ikRootIds[rid - 1]].pos))
     currLength += length
     dist.push(currLength / maxLength)
-  })
+  }
 
   const base = subv2(target, root)
   const baseAngle = Math.atan2(base.y, base.x)
@@ -124,45 +126,50 @@ function arcIk(bones, ikRootIds, root, target) {
   const peak = maxLength / baseMag
   const valley = baseMag / maxLength
 
-  ikRootIds.forEach((rootId, rid) => {
-    if (rid == 0) { return }
-    bones[rootId].pos = {
-      x: bones[rootId].pos.x * valley,
+  for (let rid = 0; rid < ikRootIds.length; rid++) {
+    if (rid == 0) {
+      continue
+    }
+    bones[ikRootIds[rid]].pos = {
+      x: bones[ikRootIds[rid]].pos.x * valley,
       y: root.y + (1 - peak) * Math.sin(dist[rid] * 3.14) * baseMag
     }
-    const rotated = rotate(subv2(bones[rootId].pos, root), baseAngle)
-    bones[rootId].pos = addv2(rotated, root)
-  })
+    const rotated = rotate(subv2(bones[ikRootIds[rid]].pos, root), baseAngle)
+    bones[ikRootIds[rid]].pos = addv2(rotated, root)
+  }
 }
 
 function inverseKinematics(bones, ikRootIds) {
   let ikRots = []
-  ikRootIds.forEach(rootId => {
-    family = bones[rootId]
+  for (let i = 0; i < ikRootIds.length; i++) {
+    family = bones[ikRootIds[i]]
 
     const root = { x: family.pos.x, y: family.pos.y };
     const target = { x: bones[family.ik_target_id].pos.x, y: bones[family.ik_target_id].pos.y };
+
+    // run the appropriate IK mode
     if (family.ik_mode == "FABRIK") {
-      for (i = 0; i < 10; i++) {
+      for (f = 0; f < 10; f++) {
         fabrik(bones, family.ik_bone_ids, root, target)
       }
     } else {
       arcIk(bones, family.ik_bone_ids, root, target)
     }
 
+    // the IK modes above only change bone position; now rotate the bones such that they point to the next one
     const endBone = bones[family.ik_bone_ids[family.ik_bone_ids.length - 1]]
     let tipPos = { x: endBone.pos.x, y: endBone.pos.y };
-    let rev_bone_ids = [];
-    copyArray(rev_bone_ids, family.ik_bone_ids);
-    rev_bone_ids.reverse().forEach((bid, b) => {
+    for (let b = 0; b < family.ik_bone_ids.length; b++) {
       if (b == 0) {
-        return
+        continue
       }
+      let bid = family.ik_bone_ids[family.ik_bone_ids.length - 1 - b];
       const dir = subv2(tipPos, bones[bid].pos)
       bones[bid].rot = Math.atan2(dir.y, dir.x)
       tipPos = { x: bones[bid].pos.x, y: bones[bid].pos.y };
-    })
+    }
 
+    // apply constraints, if appropriate
     const jointDir = normalize(subv2(bones[family.ik_bone_ids[1]].pos, root))
     const baseDir = normalize(subv2(target, root))
     const dir = jointDir.x * baseDir.y - baseDir.x * jointDir.y;
@@ -176,33 +183,32 @@ function inverseKinematics(bones, ikRootIds) {
     }
 
     /* save rots to hash */
-    family.ik_bone_ids.forEach((bid, b) => {
+    for (let b = 0; b < family.ik_bone_ids.length; b++) {
       if (b == family.ik_bone_ids.length - 1) {
-        return
+        continue
       }
-      ikRots[bones[bid].id] = bones[bid].rot
-    })
-  })
+      ikRots[bones[family.ik_bone_ids[b]].id] = bones[family.ik_bone_ids[b]].rot
+    }
+  }
 
   return ikRots
 }
 
 function SkfGenericGetBoneTexture(texName, styles) {
   finalTex = false
-  styles.forEach(style => {
-    style.textures.forEach(tex => {
+  for (style of styles) {
+    for (tex of style.textures) {
       if (texName == tex.name && !finalTex) {
-        finalTex = tex
+        return tex;
       }
-    })
-  })
-  return finalTex
+    }
+  }
 }
 
 function SkfGenericAnimate(bones, anims, frames, smoothFrames) {
-  anims.forEach((anim, a) => {
+  for (let a = 0; a < anims.length; a++) {
     for (k = 0; k < anim.keyframes.length; k++) {
-      let kf = anim.keyframes[k];
+      let kf = anims[a].keyframes[k];
 
       // only prev keyframes are considered
       if (kf.frame > frames[a]) {
@@ -212,10 +218,10 @@ function SkfGenericAnimate(bones, anims, frames, smoothFrames) {
       if (kf.next_kf == -1) {
         kf.next_kf = k;
       }
-      let nextKf = anim.keyframes[kf.next_kf];
+      let nextKf = anims[a].keyframes[kf.next_kf];
 
       // this is a redundant keyframe if the next one is also before this frame
-      if (nextKf.frame < frames[a]) {
+      if (nextKf.frame < frames[a] && kf.next_kf != k) {
         continue;
       }
 
@@ -233,10 +239,13 @@ function SkfGenericAnimate(bones, anims, frames, smoothFrames) {
         bone.scale.x = interpolateKeyframes(bone.scale.x, kf, nextKf, frames[a], smoothFrames[a]);
       if (c1 == 'S' && c2 == 'Y')
         bone.scale.y = interpolateKeyframes(bone.scale.y, kf, nextKf, frames[a], smoothFrames[a]);
+      if (c1 == 'H' && c2 == 'n') {
+        bone.hidden = kf.value == 1;
+      }
     }
-  })
+  }
 
-  // reset bone fields w/ bitmasks
+  /* reset bone fields w/ bitmasks */
   const animatedMap = new Map();
   const FLAGS = {
     PositionX: 1 << 0,
@@ -260,7 +269,7 @@ function SkfGenericAnimate(bones, anims, frames, smoothFrames) {
     if (!(mask & FLAGS.Rotation)) bone.rot = bone.init_rot;
     if (!(mask & FLAGS.ScaleX)) bone.scale.x = bone.init_scale.x;
     if (!(mask & FLAGS.ScaleY)) bone.scale.y = bone.init_scale.y;
-    if (!(mask & FLAGS.Hidden)) bone.hidden = bone.init_hidden == 1;
+    if (!(mask & FLAGS.Hidden)) bone.hidden = bone.init_hidden || false;
   }
 }
 
@@ -297,19 +306,20 @@ function interpolateKeyframes(field, prevKf, nextKf, frame, smoothFrame) {
 }
 
 function resetInheritance(cachedBones, ogBones) {
-  cachedBones.forEach((bone, b) => {
+  for (let b = 0; b < cachedBones.length; b++) {
     cachedBones[b].pos = ogBones[b].pos;
     cachedBones[b].scale = ogBones[b].scale;
     cachedBones[b].rot = ogBones[b].rot;
-  })
+    cachedBones[b].hidden = ogBones[b].hidden;
+  }
 }
 
 function inheritance(bones, ikRots) {
-  bones.forEach((bone, b) => {
-    if (bone.parent_id == -1) {
-      return;
+  for (let b = 0; b < bones.length; b++) {
+    if (bones[b].parent_id == -1) {
+      continue;
     }
-    const parent = bones[bone.parent_id]
+    const parent = bones[bones[b].parent_id]
 
     bones[b].rot += parent.rot
     bones[b].scale = mulv2(bones[b].scale, parent.scale)
@@ -318,10 +328,10 @@ function inheritance(bones, ikRots) {
     bones[b].pos = rotate(bones[b].pos, parent.rot)
     bones[b].pos = addv2(bones[b].pos, parent.pos)
 
-    if (ikRots[bone.id]) {
-      bones[b].rot = ikRots[bone.id]
+    if (ikRots[bones[b].id]) {
+      bones[b].rot = ikRots[bones[b].id]
     }
-  })
+  }
 
   return bones
 }
@@ -329,6 +339,8 @@ function inheritance(bones, ikRots) {
 function SkfGenericConstruct(rawBones, ikRootIds, cachedBones) {
   if (!cachedBones) {
     cachedBones = structuredClone(rawBones);
+  } else {
+    cachedBones.sort((a, b) => (a.id > b.id) ? 1 : -1)
   }
 
   resetInheritance(cachedBones, rawBones);
@@ -345,25 +357,25 @@ function SkfGenericConstruct(rawBones, ikRootIds, cachedBones) {
 }
 
 function constructVerts(bones) {
-  bones.forEach((_, b) => {
+  for (let b = 0; b < bones.length; b++) {
     if (!bones[b].vertices) {
-      return
+      continue;
     }
 
-    bones[b].vertices.forEach((vert, v) => {
-      bones[b].vertices[v].pos = vert.init_pos;
-      bones[b].vertices[v].pos = inheritVert(vert.pos, bones[b]);
-    })
+    for (let v = 0; v < bones[b].vertices.length; v++) {
+      bones[b].vertices[v].pos = bones[b].vertices[v].init_pos;
+      bones[b].vertices[v].pos = inheritVert(bones[b].vertices[v].pos, bones[b]);
+    }
 
-    bones[b].binds.forEach((bind, bi) => {
-      if (bind.bone_id == -1) {
-        return;
+    for (let bi = 0; bi < bones[b].binds.length; bi++) {
+      if (bones[b].binds[bi].bone_id == -1) {
+        continue;
       }
 
-      const bindBone = bones[bind.bone_id];
+      const bindBone = bones[bones[b].binds[bi].bone_id];
 
       for (bind_vert of bones[b].binds[bi].verts) {
-        if (!bind.is_path) {
+        if (!bones[b].binds[bi].is_path) {
           let vert = bones[b].vertices[bind_vert.id];
           endPos = subv2(inheritVert(vert.init_pos, bindBone), vert.pos);
           vert.pos = addv2(vert.pos, mulv2f(endPos, bind_vert.weight));
@@ -388,8 +400,8 @@ function constructVerts(bones) {
         let rotated = rotate(subv2(vert.pos, bindBone.pos), normAngle)
         vert.pos = addv2(bindBone.pos, mulv2f(rotated, bind_vert.weight))
       }
-    })
-  })
+    }
+  }
 }
 
 function inheritVert(pos, bone) {

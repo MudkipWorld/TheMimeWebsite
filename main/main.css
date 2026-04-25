@@ -46,6 +46,12 @@
   bottom: 145px;
 }
 
+.character_picnic {
+  background-size: 225px;
+  left: 0px;
+  bottom: 145px;
+}
+
 .character_static {
   background-image: url("../assets/main_page_assets/placeholders/pickles.png");
   background-size: 250px;
@@ -60,6 +66,15 @@
   pointer-events: auto;
   cursor: pointer;
 }
+
+#glcanvas2 {
+  bottom: 0;
+  left: 0;
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
 
 .middle {
   background-image: url("../assets/main_page_assets/main_page_placeholder.svg");
