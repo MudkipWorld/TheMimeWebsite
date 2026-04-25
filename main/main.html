@@ -26,10 +26,10 @@
         </div>
 
         <div class="layer middle"></div>
-        <!--
+        
         <div class="layer character_picnic">
             <canvas id="glcanvas2" width="310" height="650" onclick="squish(1, 500)"></canvas>
-        </div>-->
+        </div>
         <div class="layer front"></div>
     </div>
     <div class="flex_container">
@@ -89,17 +89,15 @@
             c.constructOptions.scale = { x: scl_x, y: scl_y };
             c.constructOptions.position = { x: x, y: y };
             //console.log(c.armature)
+        }
+
+        async function startCanvases() {
+            await start("models/pickles.skf", 0, glcanvas, 0.75, 0.75, 175, -250);
+            await start("models/foveositting.skf", 1, glcanvas2, 0.68, 0.68, 165, -415);
             requestAnimationFrame(SkfNewFrame);
         }
 
-        //async function requestAnimFrame() {
-            //requestAnimationFrame(SkfNewFrame);
-        //}
-
-        start("models/pickles.skf", 0, glcanvas, 0.75, 0.75, 175, -250);
-        //start("models/foveositting.skf", 1, glcanvas2, 0.68, 0.68, 165, -415);
-
-        //requestAnimFrame();
+        startCanvases();
 
         async function squish(index, delay_ms) {
             const c = skfCanvases[index];

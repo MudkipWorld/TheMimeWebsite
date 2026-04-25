@@ -64,12 +64,6 @@
   border: none;
 }
 
-canvas {
-  width: 50%;
-  height: 50%;
-  margin: auto;
-  display: block;
-}
 
 .centered_play_button {
   background-image: url("../assets/main_page_assets/button.svg");
